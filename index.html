@@ -1,17 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Firebase Debug - Leonidas Goals</title>
-  <script src="https://www.gstatic.com/firebasejs/9.29.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.29.0/firebase-database-compat.js"></script>
+  <!-- Firebase v8 scripts (global firebase object available immediately) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
-<body style="background:#111; color:white; font-family:monospace">
+<body>
   <h1>Firebase Debug - Leonidas Goals</h1>
-  <p>Raw Firebase data:</p>
   <pre id="output">Loading...</pre>
 
   <script>
+    console.log("Firebase at start:", window.firebase);
+
     const firebaseConfig = {
       apiKey: "AIzaSyCjNY4jonCkxLhdS9MQCg382l2y6pmPOc4",
       authDomain: "leonidasgoalstracker.firebaseapp.com",
@@ -23,17 +25,15 @@
       measurementId: "G-59JJEDNL8E"
     };
 
-    // Initialize
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
+
     const db = firebase.database();
 
-    // Listen to goals
-    db.ref('goals').on('value', snap => {
-      document.getElementById('output').textContent =
+    // Listen to "goals"
+    db.ref("goals").on("value", snap => {
+      document.getElementById("output").textContent =
         JSON.stringify(snap.val(), null, 2);
-      console.log("Firebase snapshot:", snap.val());
-    }, err => {
-      document.getElementById('output').textContent = "Error: " + err.message;
     });
   </script>
 </body>
