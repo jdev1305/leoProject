@@ -3,104 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <title>R.H.V.Leonidas H13 - Goals Tracker 25/26</title>
+<!-- Firebase (compat) -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-  body { font-family: Arial; background: #121212; color: #f0f0f0; margin: 20px; }
-  h1 { text-align: center; margin-bottom: 20px; }
+  body { font-family: Arial, sans-serif; background: #121212; color: #f0f0f0; margin: 20px; }
+  h1 { text-align: center; margin-bottom: 20px; color: #fff; }
 
-  .chart-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 30px;
-  }
+  /* Chart “card” */
+  .chart-container { display: flex; justify-content: center; margin-bottom: 40px; }
   canvas {
-    max-width: 700px; 
-    max-height: 450px; 
-    width: 90%;
-    background: #1e1e1e;
-    padding: 15px;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    max-width: 700px; max-height: 450px; width: 90%;
+    background: #1f1f1f; padding: 15px; border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.7);
   }
 
+  /* Week “card” */
+  .week-card {
+    max-width: 900px; margin: 30px auto; background: #2b2b2b;
+    border-radius: 16px; padding: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+  }
   .week-header {
-    margin: 30px auto 10px auto;
-    font-size: 1.4em;
-    font-weight: bold;
-    background: #007bff;
-    color: white;
-    display: inline-block;
-    padding: 8px 18px;
-    border-radius: 20px;
+    text-align: center; font-size: 1.4em; font-weight: bold; margin-bottom: 10px;
+    color: #fff; background: #007bff; padding: 6px 16px; border-radius: 10px; display: inline-block;
     box-shadow: 0 3px 8px rgba(0,0,0,0.5);
   }
 
-  table {
-    width: 100%;
-    max-width: 800px;
-    margin: 10px auto 30px auto;
-    border-collapse: collapse;
-    background: #1e1e1e;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-  }
+  table { width: 100%; border-collapse: collapse; background: #1e1e1e; border-radius: 12px; overflow: hidden; }
   th, td { padding: 12px; text-align: center; }
   th { background: #007bff; color: #fff; font-size: 1.1em; }
   td { border-top: 1px solid #333; }
+  tr:nth-child(even) { background: #242424; }
 
-  td button {
-    border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1em;
-    font-weight: bold;
-    margin: 2px;
+  input[type="text"]{
+    padding: 8px 10px; border-radius: 6px; border: none; background: #333; color: #fff; width: 100%;
   }
-  .btn-add { background: #007bff; color: #fff; }
-  .btn-sub { background: #0056b3; color: #fff; }
-  .btn-remove { background: #dc3545; color: #fff; }
-  td button:hover { opacity: 0.9; }
 
-  .player-form {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    padding: 12px;
-    background: #2a2a2a;
-  }
-  .player-form input {
-    padding: 8px;
-    border-radius: 6px;
-    border: none;
-    background: #333;
-    color: white;
-    flex: 1;
-  }
-  .player-form button {
-    background: #007bff;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1em;
-    font-weight: bold;
-  }
-  .player-form button:hover { background: #0056b3; }
-
-  .opponent-input {
-    width: 100%;
-    padding: 6px;
-    border-radius: 6px;
-    border: none;
-    background: #333;
-    color: white;
-    text-align: center;
-  }
+  /* Buttons (unified) */
+  button { border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: #fff; margin: 2px; }
+  .btn-plus   { background: #007bff; padding: 8px 14px; }
+  .btn-minus  { background: #ff9800; padding: 8px 14px; }
+  .btn-remove { background: #dc3545; padding: 8px 14px; }
+  .btn-primary{ background: #007bff; padding: 8px 16px; }
+  button:hover{ opacity: .92; }
 </style>
 </head>
 <body>
@@ -113,6 +61,7 @@
 <div id="results"></div>
 
 <script>
+  // --- Firebase config ---
   const firebaseConfig = {
     apiKey: "AIzaSyCjNY4jonCkxLhdS9MQCg382l2y6pmPOc4",
     authDomain: "leonidasgoalstracker.firebaseapp.com",
@@ -120,142 +69,173 @@
     projectId: "leonidasgoalstracker",
     storageBucket: "leonidasgoalstracker.appspot.com",
     messagingSenderId: "351370021203",
-    appId: "1:351370021203:web:8d0ca697abc1646d4079a6",
-    measurementId: "G-59JJEDNL8E"
+    appId: "1:351370021203:web:8d0ca697abc1646d4079a6"
   };
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
   const goalsRef = db.ref('goals');
-  const opponentsRef = db.ref('opponents');
   let chart;
 
-  // Ensure 10 weeks exist
-  goalsRef.once('value').then(snapshot => {
-    let data = snapshot.val() || {};
-    for (let i=1; i<=10; i++) {
-      if (!data[`Week${i}`]) data[`Week${i}`] = {};
-    }
-    goalsRef.set(data, () => {
-      goalsRef.on('value', snap => {
-        const goals = snap.val() || {};
-        opponentsRef.once('value').then(opSnap => {
-          const opponents = opSnap.val() || {};
-          renderAll(goals, opponents);
-        });
-      });
-    });
+  // Always render 1–10; listen for changes
+  goalsRef.on('value', snap => {
+    const data = snap.val() || {};
+    renderAll(data);
   });
 
-  function renderAll(goals, opponents){
-    renderTables(goals, opponents);
-    renderChart(goals);
+  function renderAll(data){
+    ensureWeeksExistFrontEnd(data);  // virtual only; don’t write empty weeks
+    renderChart(data);
+    renderTables(data);
   }
 
-  function renderTables(goals, opponents){
-    const resultsDiv = document.getElementById("results");
-    resultsDiv.innerHTML = '';
-    for(let i=1;i<=10;i++){
-      const week = `Week${i}`;
-      const weekData = goals[week] || {};
-      const opponentName = opponents[week] || '';
-      let tableHTML = `
-        <div class="week-header">Week ${i}</div>
-        <table>
-          <tr>
-            <th>Player</th>
-            <th>Goals</th>
-            <th>Actions</th>
-            <th>Opponent</th>
-          </tr>`;
-      for(const player in weekData){
-        tableHTML += `<tr>
-          <td><b>${player}</b></td>
-          <td>${weekData[player]}</td>
-          <td>
-            <button class="btn-add" onclick="changeGoal('${week}','${player}',1)">+1</button>
-            <button class="btn-sub" onclick="changeGoal('${week}','${player}',-1)">-1</button>
-            <button class="btn-remove" onclick="removePlayer('${week}','${player}')">X</button>
-          </td>
-          <td rowspan="100">
-            <input class="opponent-input" value="${opponentName}" 
-              onchange="saveOpponent('${week}', this.value)" placeholder="Opponent"/>
-          </td>
-        </tr>`;
-      }
-      tableHTML += `
-        <tr>
-          <td colspan="4">
-            <div class="player-form">
-              <input type="text" id="player-${week}" placeholder="Player name">
-              <button onclick="addPlayer('${week}')">Add Player</button>
-            </div>
-          </td>
-        </tr>
-      </table>`;
-      resultsDiv.innerHTML += tableHTML;
+  function ensureWeeksExistFrontEnd(data){
+    for (let i=1; i<=10; i++){
+      const k = `Week${i}`;
+      if (!data[k]) data[k] = {}; // virtual empty so it renders
     }
   }
 
+  // ---------- TABLES ----------
+  function renderTables(data){
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '';
+
+    for (let i=1; i<=10; i++){
+      const weekKey = `Week${i}`;
+      const weekData = data[weekKey] || {};
+      const opponent = weekData._opponent || '';
+
+      let html = `
+        <div class="week-card">
+          <div class="week-header">Week ${i}</div>
+          <table>
+            <tr>
+              <th>Player</th>
+              <th>Goals</th>
+              <th>Actions</th>
+              <th>Opponent</th>
+            </tr>
+            <tr>
+              <td colspan="3"></td>
+              <td><input type="text" value="${escapeHtml(opponent)}" placeholder="Opponent"
+                  oninput="/* typing */"
+                  onchange="saveOpponent('${weekKey}', this.value)"></td>
+            </tr>
+      `;
+
+      // player rows (skip meta keys & non-numeric)
+      Object.keys(weekData).forEach(name => {
+        const val = weekData[name];
+        if (name.startsWith('_')) return;
+        if (typeof val !== 'number') return;
+
+        html += `
+          <tr>
+            <td style="font-weight:bold">${escapeHtml(name)}</td>
+            <td>${val}</td>
+            <td>
+              <button class="btn-plus"   onclick="updateGoals('${weekKey}','${escapeAttr(name)}', 1)">+1</button>
+              <button class="btn-minus"  onclick="updateGoals('${weekKey}','${escapeAttr(name)}',-1)">-1</button>
+              <button class="btn-remove" onclick="removePlayer('${weekKey}','${escapeAttr(name)}')">X</button>
+            </td>
+            <td></td>
+          </tr>
+        `;
+      });
+
+      // add player row
+      html += `
+            <tr>
+              <td colspan="4" style="background:#262626">
+                <div style="display:flex; gap:10px; align-items:center;">
+                  <input id="add-${weekKey}" type="text" placeholder="Player name">
+                  <button class="btn-primary" onclick="addPlayer('${weekKey}')">Add Player</button>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      `;
+      resultsDiv.insertAdjacentHTML('beforeend', html);
+    }
+  }
+
+  // ---------- CHART ----------
   function renderChart(data){
     const totals = {};
-    for(const week in data){
-      for(const player in data[week]){
-        totals[player] = (totals[player]||0)+data[week][player];
-      }
-    }
-    const sortedTotals = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
-    const labels = sortedTotals.map(e=>e[0]);
-    const values = sortedTotals.map(e=>e[1]);
+    Object.keys(data).forEach(weekKey => {
+      const weekData = data[weekKey] || {};
+      Object.keys(weekData).forEach(name => {
+        const val = weekData[name];
+        if (name.startsWith('_')) return;             // ignore meta like _opponent
+        if (typeof val !== 'number') return;          // ignore non-numeric (safety)
+        totals[name] = (totals[name] || 0) + val;
+      });
+    });
+
+    const sorted = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+    const labels = sorted.map(e=>e[0]);
+    const values = sorted.map(e=>e[1]);
+
     const ctx = document.getElementById('totalGoalsChart').getContext('2d');
-    if(chart) chart.destroy();
-    chart = new Chart(ctx,{
-      type:'bar',
-      data:{
+    if (chart) chart.destroy();
+    chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
         labels,
-        datasets:[{
-          label:'Total Goals',
-          data:values,
-          backgroundColor: labels.map((_,i)=>`hsl(${i*40},70%,50%)`),
-          borderRadius:6,
-          barPercentage:0.7,
-          categoryPercentage:0.8
+        datasets: [{
+          label: 'Total Goals',
+          data: values,
+          backgroundColor: labels.map((_,i)=>`hsl(${(i*40)%360},70%,50%)`),
+          borderRadius: 6,
+          barPercentage: 0.7,      // thicker bars
+          categoryPercentage: 0.8   // tighter grouping
         }]
       },
-      options:{
-        indexAxis:'y',
-        responsive:true,
-        plugins:{legend:{display:false}},
-        scales:{
-          x:{beginAtZero:true, ticks:{precision:0, color:'#ccc'}, grid:{color:'#333'}},
-          y:{ticks:{font:{size:18, weight:'bold'}, color:'#fff'}, grid:{color:'#222'}}
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { beginAtZero: true, ticks: { precision: 0, color: '#ccc' }, grid: { color: '#333' } },
+          y: { ticks: { font: { size: 18, weight: 'bold' }, color: '#fff' }, grid: { color: '#222' } }
         }
       }
     });
   }
 
-  function changeGoal(week, player, delta){
-    const ref = db.ref(`goals/${week}/${player}`);
-    ref.transaction(current => {
-      return Math.max(0,(current||0)+delta);
+  // ---------- ACTIONS ----------
+  function addPlayer(weekKey){
+    const input = document.getElementById(`add-${weekKey}`);
+    const name = (input.value || '').trim();
+    if (!name) return;
+    db.ref(`goals/${weekKey}/${name}`).set(0);
+    input.value = '';
+  }
+
+  function updateGoals(weekKey, name, delta){
+    const ref = db.ref(`goals/${weekKey}/${name}`);
+    ref.transaction(curr => {
+      curr = typeof curr === 'number' ? curr : 0;
+      const next = curr + delta;
+      return next < 0 ? 0 : next;
     });
   }
 
-  function removePlayer(week, player){
-    db.ref(`goals/${week}/${player}`).remove();
+  function removePlayer(weekKey, name){
+    if (!confirm(`Remove ${name} from ${weekKey}?`)) return;
+    db.ref(`goals/${weekKey}/${name}`).remove();
   }
 
-  function addPlayer(week){
-    const input = document.getElementById(`player-${week}`);
-    const name = input.value.trim();
-    if(!name) return;
-    db.ref(`goals/${week}/${name}`).set(0);
-    input.value='';
+  function saveOpponent(weekKey, val){
+    db.ref(`goals/${weekKey}/_opponent`).set(val || null);
   }
 
-  function saveOpponent(week, value){
-    opponentsRef.child(week).set(value);
-  }
+  // ---------- small helpers to avoid breaking HTML when names have quotes ----------
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+  function escapeAttr(s){ return String(s).replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 </script>
 </body>
 </html>
