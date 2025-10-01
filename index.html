@@ -22,18 +22,20 @@
       max-width: 800px;
       margin: 20px auto;
       padding: 20px;
-      background: #222;
+      background: #2a2a2a;
+      border: 1px solid #444;
       border-radius: 14px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.8);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.9);
       height: 400px;
     }
     .week-container {
       max-width: 800px;
       margin: 20px auto;
-      background: #222;
+      background: #2a2a2a;
+      border: 1px solid #444;
       border-radius: 14px;
-      padding: 10px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.8);
+      padding: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.9);
       text-align: left;
     }
     .week-title {
@@ -51,26 +53,33 @@
     }
     th, td {
       padding: 10px;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid #444;
       vertical-align: middle;
     }
     th {
       background: #007bff;
       color: white;
     }
-    th.opponent-header {
+    .opponent-cell {
       text-align: right;
     }
-    input {
+    .opponent-input {
+      width: 160px;
       padding: 6px;
-      margin: 4px;
       border-radius: 6px;
       border: none;
-      background: #2c2c2c;
+      background: #333;
+      color: white;
+    }
+    input[type="text"] {
+      padding: 6px;
+      border-radius: 6px;
+      border: none;
+      background: #333;
       color: white;
     }
     button {
-      padding: 14px 20px; /* slightly bigger */
+      padding: 16px 22px;
       margin: 4px;
       border: none;
       border-radius: 6px;
@@ -84,6 +93,7 @@
     .btn-minus { background: #ff9800; }
     .btn-action { background: #007bff; }
     .add-player-row td {
+      text-align: left; /* align Add Player to left */
       padding-top: 12px;
     }
   </style>
@@ -125,8 +135,6 @@
           totals[player] = (totals[player] || 0) + allData[week][player];
         }
       }
-
-      // Sort players by goals
       const sorted = Object.entries(totals).sort((a,b) => b[1] - a[1]);
       const labels = sorted.map(([p]) => p);
       const data = sorted.map(([_,g]) => g);
@@ -142,8 +150,8 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } }, // remove "Total Goals"
-          indexAxis: "y", // horizontal bars
+          plugins: { legend: { display: false } },
+          indexAxis: "y",
           scales: {
             x: { ticks: { color: "#fff", precision:0 } },
             y: { ticks: { color: "#fff" } }
@@ -164,9 +172,9 @@
                 <th>Player</th>
                 <th>Goals</th>
                 <th>Actions</th>
-                <th class="opponent-header">
+                <th class="opponent-cell">
                   Opponent: 
-                  <input type="text" value="${opponent}" 
+                  <input class="opponent-input" type="text" value="${opponent}" 
                     onchange="saveOpponent('${week}', this.value)">
                 </th>
               </tr>
@@ -205,15 +213,11 @@
     // Update functions
     function updateGoals(week, player, delta) {
       const ref = db.ref("goals/" + week + "/" + player);
-      ref.transaction(current => {
-        return (current || 0) + delta > 0 ? (current || 0) + delta : 0;
-      });
+      ref.transaction(current => (current || 0) + delta > 0 ? (current || 0) + delta : 0);
     }
-
     function removePlayer(week, player) {
       db.ref("goals/" + week + "/" + player).remove();
     }
-
     function addPlayer(week) {
       const input = document.getElementById("newPlayer-" + week);
       const name = input.value.trim();
@@ -222,7 +226,6 @@
         input.value = "";
       }
     }
-
     function saveOpponent(week, opponent) {
       db.ref("goals/" + week + "/_opponent").set(opponent);
     }
