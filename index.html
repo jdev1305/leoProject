@@ -23,7 +23,7 @@
     margin-bottom: 30px;
   }
   canvas {
-    max-width: 700px;
+    max-width: 650px;
     width: 90%;
     background: #1e1e1e;
     padding: 10px;
@@ -37,7 +37,7 @@
   }
   table {
     width: 100%;
-    max-width: 700px;
+    max-width: 650px;
     margin: 10px auto;
     border-collapse: collapse;
     background: #1e1e1e;
@@ -65,7 +65,7 @@
     background: #ff1a1a;
   }
   .form-container {
-    max-width: 700px;
+    max-width: 650px;
     margin: 20px auto;
     display: flex;
     justify-content: center;
@@ -130,15 +130,15 @@
   const addGoalBtn = document.getElementById("addGoalBtn");
   let chart;
 
-  // --- Initialize Weeks 1-10 if missing ---
   const goalsRef = db.ref('goals');
+
+  // --- Initialize Weeks 1-10 if missing ---
   goalsRef.once('value').then(snapshot => {
     let data = snapshot.val() || {};
     for(let i=1;i<=10;i++){
       if(!data[`Week ${i}`]) data[`Week ${i}`] = {};
     }
     goalsRef.set(data);
-    renderAll(data);
   });
 
   // --- Render functions ---
@@ -208,7 +208,7 @@
         plugins:{legend:{display:false}},
         scales:{
           x:{beginAtZero:true, stepSize:1, ticks:{precision:0}, grid:{color:'#333'}},
-          y:{grid:{color:'#222'}, ticks:{font:{size:16, weight:'bold'}}}
+          y:{grid:{color:'#222'}, ticks:{font:{size:18, weight:'bold'}}}
         }
       }
     });
