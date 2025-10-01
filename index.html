@@ -5,47 +5,91 @@
   <title>R.H.V. Leonidas H13 - Goals Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f8f9fa;
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+    h1 { text-align: center; margin-bottom: 40px; }
+    .chart-container { display: flex; justify-content: center; margin-bottom: 50px; }
+    canvas { max-width: 800px; width: 90%; background: #fff; padding: 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .week-header { margin-top: 30px; font-size: 1.2em; font-weight: bold; text-align: center; }
+    table { width: 100%; margin-top: 10px; border-collapse: collapse; max-width: 800px; margin-left: auto; margin-right: auto; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    th, td { border-bottom: 1px solid #ddd; padding: 10px; text-align: center; }
+    th { background: #007bff; color: #fff; }
+  </style>
+</head>
+<body>
+  <h1>R.H.V. Leonidas H13 - Goals Tracker</h1>
+
+  <div class="chart-container">
+    <canvas id="totalGoalsChart"></canvas>
+  </div>
+
+  <div id="results"></div>
+
+  <script>
+    // ========= EDIT THIS DATA =========
+    const data = {
+      "Week 1": { "Alice": 2, "Bob": 1, "Charlie": 1 },
+      "Week 2": { "Alice": 1, "David": 3 },
+      "Week 3": { "Charlie": 2, "Bob": 2, "Eve": 1 },
+      "Week 4": { "Alice": 2, "Charlie": 1 }
+    };
+    // ==================================
+
+    const resultsDiv = document.getElementById("results");
+
+    function renderTables() {
+      resultsDiv.innerHTML = "";
+      for (const week in data) {
+        const weekData = data[week];
+        let tableHTML = `<div class="week-header">${week}</div><table><tr><th>Player</th><th>Goals</th></tr>`;
+        for (const player in weekData) {
+          tableHTML += `<tr><td>${player}</td><td>${weekData[player]}</td></tr>`;
+        }
+        tableHTML += "</table>";
+        resultsDiv.innerHTML += tableHTML;
+      }
     }
-    h1 {
-      text-align: center;
-      margin-bottom: 40px;
+
+    function renderTotalGoalsChart() {
+      const totals = {};
+      for (const week in data) {
+        for (const player in data[week]) {
+          totals[player] = (totals[player] || 0) + data[week][player];
+        }
+      }
+
+      const ctx = document.getElementById("totalGoalsChart").getContext("2d");
+
+      // Use a simple color array to avoid gradient issues
+      const colors = ["#4BC0C0","#FF6384","#FFCE56","#36A2EB","#9966FF","#FF9F40"];
+
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: Object.keys(totals),
+          datasets: [{
+            label: "Total Goals",
+            data: Object.values(totals),
+            backgroundColor: colors.slice(0, Object.keys(totals).length),
+            borderRadius: 10,
+            hoverBackgroundColor: "#00a8a8"
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: "#e0e0e0" } },
+            x: { grid: { color: "#f0f0f0" } }
+          }
+        }
+      });
     }
-    .chart-container {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 50px;
-    }
-    canvas {
-      max-width: 800px;
-      width: 90%;
-      background: #fff;
-      padding: 15px;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    .week-header {
-      margin-top: 30px;
-      font-size: 1.2em;
-      font-weight: bold;
-      text-align: center;
-    }
-    table {
-      width: 100%;
-      margin-top: 10px;
-      border-collapse: collapse;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-      background: #fff;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    th, td {
-      border-bottom: 1px solid #ddd;
-      padding: 10px;
-      text-align: c
+
+    // Render tables and chart **after DOM is ready**
+    document.addEventListener("DOMContentLoaded", () => {
+      renderTotalGoalsChart();
+      renderTables();
+    });
+  </script>
+</body>
+</html>
