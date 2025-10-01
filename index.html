@@ -1,22 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
   <title>Firebase Debug - Leonidas Goals</title>
   <script src="https://www.gstatic.com/firebasejs/9.29.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.29.0/firebase-database-compat.js"></script>
-  <style>
-    body { background:#121212; color:#f0f0f0; font-family:Arial; padding:20px; }
-    pre { background:#1e1e1e; padding:15px; border-radius:8px; white-space:pre-wrap; }
-  </style>
 </head>
-<body>
+<body style="background:#111; color:white; font-family:monospace">
   <h1>Firebase Debug - Leonidas Goals</h1>
   <p>Raw Firebase data:</p>
   <pre id="output">Loading...</pre>
 
   <script>
-    // --- Firebase config ---
     const firebaseConfig = {
       apiKey: "AIzaSyCjNY4jonCkxLhdS9MQCg382l2y6pmPOc4",
       authDomain: "leonidasgoalstracker.firebaseapp.com",
@@ -28,21 +23,17 @@
       measurementId: "G-59JJEDNL8E"
     };
 
-    // --- Init ---
-    const app = firebase.initializeApp(firebaseConfig);
+    // Initialize
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const output = document.getElementById("output");
 
-    // --- Listen to /goals ---
-    const goalsRef = db.ref('goals');
-    goalsRef.on('value', snap => {
-      const data = snap.val();
-      console.log("Firebase snapshot:", data); // log to console
-      if (!data) {
-        output.textContent = "⚠️ Firebase returned null (no data or wrong path)";
-      } else {
-        output.textContent = JSON.stringify(data, null, 2);
-      }
+    // Listen to goals
+    db.ref('goals').on('value', snap => {
+      document.getElementById('output').textContent =
+        JSON.stringify(snap.val(), null, 2);
+      console.log("Firebase snapshot:", snap.val());
+    }, err => {
+      document.getElementById('output').textContent = "Error: " + err.message;
     });
   </script>
 </body>
