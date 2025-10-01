@@ -67,10 +67,9 @@
   goalsRef.once('value').then(snapshot => {
     let data = snapshot.val() || {};
     for (let i=1; i<=10; i++) {
-      if (!data[`Week ${i}`]) data[`Week ${i}`] = {};
+      if (!data[`Week${i}`]) data[`Week${i}`] = {};
     }
     goalsRef.set(data, () => {
-      // After initialization, start listening
       goalsRef.on('value', snap => {
         const data = snap.val();
         if (data) renderAll(data);
@@ -88,18 +87,20 @@
     weekSelect.innerHTML = '';
     for(let i=1;i<=10;i++){
       const opt = document.createElement('option');
-      opt.value = `Week ${i}`;
-      opt.textContent = `Week ${i}`;
+      opt.value = `Week${i}`;        // DB key
+      opt.textContent = `Week ${i}`; // Display label
       weekSelect.appendChild(opt);
     }
   }
 
   function renderTables(data){
     resultsDiv.innerHTML = '';
-    Object.keys(data).sort((a,b)=>parseInt(a.split(' ')[1])-parseInt(b.split(' ')[1]))
+    Object.keys(data)
+      .sort((a,b)=>parseInt(a.replace('Week',''))-parseInt(b.replace('Week','')))
       .forEach(week=>{
         const weekData = data[week];
-        let tableHTML = `<div class="week-header">${week}</div><table><tr><th>Player</th><th>Goals</th><th>Remove</th></tr>`;
+        const weekLabel = week.replace('Week','Week '); // Display with space
+        let tableHTML = `<div class="week-header">${weekLabel}</div><table><tr><th>Player</th><th>Goals</th><th>Remove</th></tr>`;
         for(const player in weekData){
           tableHTML += `<tr>
             <td>${player}</td>
@@ -136,7 +137,7 @@
         responsive:true,
         plugins:{legend:{display:false}},
         scales:{
-          x:{beginAtZero:true, stepSize:1, ticks:{precision:0}, grid:{color:'#333'}},
+          x:{beginAtZero:true, ticks:{precision:0}, grid:{color:'#333'}},
           y:{grid:{color:'#222'}, ticks:{font:{size:18, weight:'bold'}}}
         }
       }
@@ -144,7 +145,7 @@
   }
 
   addGoalBtn.addEventListener('click',()=>{
-    const week = weekSelect.value;
+    const week = weekSelect.value;   // e.g. "Week2"
     const player = playerInput.value.trim();
     const goals = parseInt(goalsInput.value);
     if(!player || !goals || goals < 1) return alert('Enter valid player and goals');
@@ -153,7 +154,7 @@
   });
 
   function removeGoal(week,player){
-    if(confirm(`Are you sure you want to remove ${player}'s goals for ${week}?`)){
+    if(confirm(`Are you sure you want to remove ${player}'s goals for ${week.replace('Week','Week ')}?`)){
       db.ref(`goals/${week}/${player}`).remove();
     }
   }
