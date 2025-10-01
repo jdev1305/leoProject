@@ -3,9 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <title>R.H.V.Leonidas H13 - Goals Tracker 25/26</title>
-<script src="https://www.gstatic.com/firebasejs/9.29.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.29.0/firebase-database-compat.js"></script>
+
+<!-- Firebase v8 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
   body { 
     font-family: Arial, sans-serif; 
@@ -14,11 +19,7 @@
     margin: 20px; 
   }
   h1 { text-align: center; margin-bottom: 20px; }
-  .chart-container { 
-    display: flex; 
-    justify-content: center; 
-    margin-bottom: 30px; 
-  }
+  .chart-container { display: flex; justify-content: center; margin-bottom: 30px; }
   canvas { 
     max-width: 700px; 
     width: 90%; 
@@ -47,51 +48,27 @@
     overflow: hidden; 
     box-shadow: 0 4px 10px rgba(0,0,0,0.6);
   }
-  th, td { 
-    border-bottom: 1px solid #333; 
-    padding: 10px; 
-    text-align: center; 
-  }
-  th { 
-    background: #007bff; 
-    color: #fff; 
-    font-size: 1.05em;
-  }
-  td input { 
-    padding: 5px; 
-    border-radius: 6px; 
-    border: none; 
-    background: #333; 
-    color: #fff; 
-  }
+  th, td { border-bottom: 1px solid #333; padding: 10px; text-align: center; }
+  th { background: #007bff; color: #fff; font-size: 1.05em; }
+  td input { padding: 5px; border-radius: 6px; border: none; background: #333; color: #fff; }
   .action-btn { 
-    border: none; 
-    border-radius: 6px; 
-    padding: 8px 14px; 
-    font-size: 1em; 
-    margin: 2px; 
-    cursor: pointer; 
-    color: #fff;
+    border: none; border-radius: 6px; 
+    padding: 12px 20px; font-size: 1.1em; 
+    margin: 2px; cursor: pointer; 
+    color: #fff; font-weight: bold;
+    transition: transform 0.15s ease, background 0.2s ease;
   }
+  .action-btn:hover { transform: scale(1.08); }
   .action-btn.add { background: #28a745; }
   .action-btn.minus { background: #ff9800; }
   .action-btn.remove { background: #dc3545; }
-  .action-btn:hover { opacity: 0.85; }
   .add-player-container { 
-    display: flex; 
-    justify-content: center; 
-    gap: 10px; 
-    margin-top: 10px; 
+    display: flex; justify-content: center; gap: 10px; margin-top: 10px; 
   }
   .add-player-container input { flex: 1; }
   .add-player-container button { 
-    background: #007bff; 
-    color: #fff; 
-    border: none; 
-    padding: 8px 14px; 
-    border-radius: 6px; 
-    cursor: pointer; 
-    font-weight: bold;
+    background: #007bff; color: #fff; border: none; 
+    padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold;
   }
   .add-player-container button:hover { background: #0056b3; }
 </style>
@@ -118,7 +95,7 @@
     measurementId: "G-59JJEDNL8E"
   };
 
-  const app = firebase.initializeApp(firebaseConfig);
+  firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
   const resultsDiv = document.getElementById("results");
   let chart;
