@@ -16,29 +16,19 @@
     h1 { text-align: center; margin-bottom: 20px; }
     .chart-container { display: flex; justify-content: center; margin-bottom: 30px; }
     canvas { max-width: 650px; width: 90%; background: #1e1e1e; padding: 10px; border-radius: 15px; }
-    .week-header { margin-top: 20px; font-size: 1.2em; font-weight: bold; text-align: center; }
-    table { width: 100%; max-width: 650px; margin: 10px auto; border-collapse: collapse; background: #1e1e1e; border-radius: 8px; overflow: hidden; }
+    .week-header { margin-top: 30px; font-size: 1.4em; font-weight: bold; text-align: center; }
+    table { width: 100%; max-width: 750px; margin: 10px auto; border-collapse: collapse; background: #1e1e1e; border-radius: 8px; overflow: hidden; }
     th, td { border-bottom: 1px solid #333; padding: 8px; text-align: center; }
     th { background: #007bff; color: #fff; }
-    td button { background: #007bff; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+    td button { background: #007bff; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin: 0 2px; }
     td button:hover { background: #0056b3; }
     .remove-btn { background: #ff4d4d; }
     .remove-btn:hover { background: #ff1a1a; }
-    .form-container { max-width: 650px; margin: 20px auto; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-    .form-container input, .form-container select { padding: 6px 10px; border-radius: 6px; border: none; font-size: 1em; }
-    .form-container button { padding: 6px 12px; border-radius: 6px; border: none; background: #007bff; color: #fff; cursor: pointer; }
-    .form-container button:hover { background: #0056b3; }
+    input { padding: 4px 6px; border-radius: 4px; border: none; }
   </style>
 </head>
 <body>
   <h1>R.H.V.Leonidas H13 - Goals Tracker 25/26</h1>
-
-  <div class="form-container">
-    <select id="weekSelect"></select>
-    <input type="text" id="playerInput" placeholder="Player name">
-    <input type="number" id="goalsInput" placeholder="Goals" min="1">
-    <button id="addGoalBtn">Add Goal</button>
-  </div>
 
   <div class="chart-container">
     <canvas id="totalGoalsChart"></canvas>
@@ -63,10 +53,6 @@
     const db = firebase.database();
 
     const resultsDiv = document.getElementById("results");
-    const weekSelect = document.getElementById("weekSelect");
-    const playerInput = document.getElementById("playerInput");
-    const goalsInput = document.getElementById("goalsInput");
-    const addGoalBtn = document.getElementById("addGoalBtn");
     let chart;
 
     const goalsRef = db.ref('goals');
@@ -86,19 +72,8 @@
     });
 
     function renderAll(data){
-      renderDropdown();
       renderTables(data);
       renderChart(data);
-    }
-
-    function renderDropdown(){
-      weekSelect.innerHTML = '';
-      for(let i=1;i<=10;i++){
-        const opt = document.createElement('option');
-        opt.value = `Week${i}`;
-        opt.textContent = `Week ${i}`;
-        weekSelect.appendChild(opt);
-      }
     }
 
     function renderTables(data){
@@ -108,15 +83,27 @@
           const weekData = data[week];
           let tableHTML = `<div class="week-header">${week}</div>
           <table>
-            <tr><th>Player</th><th>Goals</th><th>+1</th><th>Remove</th></tr>`;
+            <tr><th>Player</th><th>Goals</th><th>Actions</th></tr>`;
+          
           for(const player in weekData){
             tableHTML += `<tr>
               <td>${player}</td>
               <td>${weekData[player]}</td>
-              <td><button onclick="incrementGoal('${week}','${player}')">+1</button></td>
-              <td><button class="remove-btn" onclick="removeGoal('${week}','${player}')">X</button></td>
+              <td>
+                <button onclick="incrementGoal('${week}','${player}')">+1</button>
+                <button onclick="decrementGoal('${week}','${player}')">-1</button>
+                <button class="remove-btn" onclick="removeGoal('${week}','${player}')">X</button>
+              </td>
             </tr>`;
           }
+
+          // Add player row
+          tableHTML += `<tr>
+            <td><input type="text" id="${week}-newPlayer" placeholder="Player name"></td>
+            <td><input type="number" id="${week}-newGoals" placeholder="Goals" min="1"></td>
+            <td><button onclick="addPlayer('${week}')">Add</button></td>
+          </tr>`;
+
           tableHTML += '</table>';
           resultsDiv.innerHTML += tableHTML;
         });
@@ -135,7 +122,7 @@
 
       // Dynamically resize chart height
       const chartCanvas = document.getElementById('totalGoalsChart');
-      const dynamicHeight = labels.length * 40; // 40px per player row
+      const dynamicHeight = Math.max(labels.length * 40, 200); // at least 200px
       chartCanvas.style.height = dynamicHeight + 'px';
 
       const ctx = chartCanvas.getContext('2d');
@@ -167,26 +154,34 @@
       });
     }
 
-    // --- Add Goal (increments existing) ---
-    addGoalBtn.addEventListener('click',()=>{
-      const week = weekSelect.value;
-      const player = playerInput.value.trim();
-      const goals = parseInt(goalsInput.value);
-      if(!player || !goals || goals < 1) return alert('Enter valid player and goals');
+    // --- Add Player inside table ---
+    function addPlayer(week){
+      const nameField = document.getElementById(`${week}-newPlayer`);
+      const goalsField = document.getElementById(`${week}-newGoals`);
+      const player = nameField.value.trim();
+      const goals = parseInt(goalsField.value);
+
+      if(!player || !goals || goals < 1) return alert("Enter valid player and goals");
 
       const playerRef = db.ref(`goals/${week}/${player}`);
-      playerRef.transaction(currentValue => {
-        return (currentValue || 0) + goals;
-      });
+      playerRef.transaction(currentValue => (currentValue || 0) + goals);
 
-      playerInput.value=''; goalsInput.value='';
-    });
+      nameField.value = '';
+      goalsField.value = '';
+    }
 
-    // --- Quick +1 Button ---
+    // --- Increment Goals ---
     function incrementGoal(week, player){
       const playerRef = db.ref(`goals/${week}/${player}`);
+      playerRef.transaction(currentValue => (currentValue || 0) + 1);
+    }
+
+    // --- Decrement Goals ---
+    function decrementGoal(week, player){
+      const playerRef = db.ref(`goals/${week}/${player}`);
       playerRef.transaction(currentValue => {
-        return (currentValue || 0) + 1;
+        if (!currentValue) return 0;
+        return Math.max(currentValue - 1, 0);
       });
     }
 
