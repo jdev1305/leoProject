@@ -3,108 +3,92 @@
 <head>
 <meta charset="UTF-8">
 <title>R.H.V.Leonidas H13 - Goals Tracker 25/26</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.29.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.29.0/firebase-database-compat.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-body {
-  font-family: 'Inter', sans-serif;
-  margin: 20px;
-  background: radial-gradient(circle at top, #121212, #1a1a1a);
-  color: #e0e0e0;
-}
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
-  font-weight: 700;
-  font-size: 2rem;
-  letter-spacing: 1px;
-}
-.form-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 30px;
-}
-.form-container input, .form-container select, .form-container button {
-  padding: 8px 12px;
-  font-size: 1rem;
-  border-radius: 8px;
-  border: none;
-  outline: none;
-}
-.form-container select { min-width: 140px; }
-.form-container button {
-  background: #007bff;
-  color: #fff;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-.form-container button:hover { background: #0056b3; }
-.chart-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 50px;
-}
-canvas {
-  max-width: 700px;
-  width: 80%;
-  height: 300px;
-  background: #1e1e1e;
-  padding: 15px;
-  border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-}
-.week-header {
-  margin-top: 30px;
-  font-size: 1.3em;
-  font-weight: 600;
-  text-align: center;
-  color: #ffffff;
-}
-.table-card {
-  background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-  max-width: 800px;
-  margin: 20px auto;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th, td {
-  border-bottom: 1px solid #333;
-  padding: 12px;
-  text-align: center;
-  color: #e0e0e0;
-  font-weight: 500;
-}
-th {
-  background: #007bff;
-  color: #fff;
-}
-.remove-btn {
-  margin-left: 10px;
-  padding: 2px 6px;
-  font-size: 0.8rem;
-  border-radius: 6px;
-  border: none;
-  background: #ff4d4d;
-  color: #fff;
-  cursor: pointer;
-}
-.remove-btn:hover { background: #cc0000; }
-table tr:nth-child(even) { background: #2a2a2a; }
-table tr:hover { background: #333; }
-
-@media(max-width: 600px){
-  canvas { width: 100%; height: 250px; }
-  table { display:block; overflow-x:auto; }
-}
+  body {
+    font-family: Arial, sans-serif;
+    background: #121212;
+    color: #f0f0f0;
+    margin: 20px;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .chart-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+  canvas {
+    max-width: 700px;
+    width: 90%;
+    background: #1e1e1e;
+    padding: 10px;
+    border-radius: 15px;
+  }
+  .week-header {
+    margin-top: 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+  }
+  table {
+    width: 100%;
+    max-width: 700px;
+    margin: 10px auto;
+    border-collapse: collapse;
+    background: #1e1e1e;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  th, td {
+    border-bottom: 1px solid #333;
+    padding: 8px;
+    text-align: center;
+  }
+  th {
+    background: #007bff;
+    color: #fff;
+  }
+  td button {
+    background: #ff4d4d;
+    color: #fff;
+    border: none;
+    padding: 2px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  td button:hover {
+    background: #ff1a1a;
+  }
+  .form-container {
+    max-width: 700px;
+    margin: 20px auto;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .form-container input, .form-container select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: none;
+    font-size: 1em;
+  }
+  .form-container button {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    background: #007bff;
+    color: #fff;
+    cursor: pointer;
+  }
+  .form-container button:hover {
+    background: #0056b3;
+  }
 </style>
 </head>
 <body>
@@ -112,7 +96,7 @@ table tr:hover { background: #333; }
 
 <div class="form-container">
   <select id="weekSelect"></select>
-  <input type="text" id="playerInput" placeholder="Player Name">
+  <input type="text" id="playerInput" placeholder="Player name">
   <input type="number" id="goalsInput" placeholder="Goals" min="1">
   <button id="addGoalBtn">Add Goal</button>
 </div>
@@ -124,179 +108,134 @@ table tr:hover { background: #333; }
 <div id="results"></div>
 
 <script>
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCjNY4jonCkxLhdS9MQCg382l2y6pmPOc4",
-  authDomain: "leonidasgoalstracker.firebaseapp.com",
-  databaseURL: "https://leonidasgoalstracker-default-rtdb.firebaseio.com",
-  projectId: "leonidasgoalstracker",
-  storageBucket: "leonidasgoalstracker.appspot.com",
-  messagingSenderId: "351370021203",
-  appId: "1:351370021203:web:8d0ca697abc1646d4079a6",
-  measurementId: "G-59JJEDNL8E"
-};
+  // --- Firebase config ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyCjNY4jonCkxLhdS9MQCg382l2y6pmPOc4",
+    authDomain: "leonidasgoalstracker.firebaseapp.com",
+    databaseURL: "https://leonidasgoalstracker-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "leonidasgoalstracker",
+    storageBucket: "leonidasgoalstracker.appspot.com",
+    messagingSenderId: "351370021203",
+    appId: "1:351370021203:web:8d0ca697abc1646d4079a6",
+    measurementId: "G-59JJEDNL8E"
+  };
 
-// Initialize Firebase
-const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-const resultsDiv = document.getElementById("results");
-const weekSelect = document.getElementById("weekSelect");
-let chartInstance = null;
+  const resultsDiv = document.getElementById("results");
+  const weekSelect = document.getElementById("weekSelect");
+  const playerInput = document.getElementById("playerInput");
+  const goalsInput = document.getElementById("goalsInput");
+  const addGoalBtn = document.getElementById("addGoalBtn");
+  let chart;
 
-// Populate week dropdown and ensure Weeks 1-10 exist
-function initWeeks(){
-  db.ref('goals').once('value', snapshot=>{
+  // --- Initialize Weeks 1-10 if missing ---
+  const goalsRef = db.ref('goals');
+  goalsRef.once('value').then(snapshot => {
     let data = snapshot.val() || {};
     for(let i=1;i<=10;i++){
-      const weekName = `Week ${i}`;
-      if(!data[weekName]) data[weekName] = {};
+      if(!data[`Week ${i}`]) data[`Week ${i}`] = {};
     }
-    db.ref('goals').set(data);
-    populateWeekDropdown(data);
+    goalsRef.set(data);
+    renderAll(data);
+  });
+
+  // --- Render functions ---
+  function renderAll(data){
+    renderDropdown();
     renderTables(data);
-    renderTotalGoalsChart(data);
-  });
-}
-
-function populateWeekDropdown(data){
-  weekSelect.innerHTML = "";
-  const sortedWeeks = Object.keys(data).sort((a,b)=>{
-    const numA = parseInt(a.match(/\d+/)?.[0]||0);
-    const numB = parseInt(b.match(/\d+/)?.[0]||0);
-    return numA - numB;
-  });
-  for(const week of sortedWeeks){
-    const option = document.createElement('option');
-    option.value = week;
-    option.textContent = week;
-    weekSelect.appendChild(option);
+    renderChart(data);
   }
-}
 
-function renderTables(data){
-  resultsDiv.innerHTML = "";
-  const sortedWeeks = Object.keys(data).sort((a,b)=>{
-    const numA = parseInt(a.match(/\d+/)?.[0]||0);
-    const numB = parseInt(b.match(/\d+/)?.[0]||0);
-    return numA - numB;
-  });
-  for(const week of sortedWeeks){
-    const weekData = data[week];
-    const tableCard = document.createElement('div');
-    tableCard.className = 'table-card';
-    let tableHTML = `<div class="week-header">${week}</div><table><tr><th>Player</th><th>Goals</th></tr>`;
-    for(const player in weekData){
-      tableHTML += `<tr>
-        <td>${player}</td>
-        <td>${weekData[player]} 
-          <button class="remove-btn" data-week="${week}" data-player="${player}">Remove</button>
-        </td>
-      </tr>`;
-    }
-    tableHTML += "</table>";
-    tableCard.innerHTML = tableHTML;
-    resultsDiv.appendChild(tableCard);
-  }
-}
-
-function getColor(index){
-  const colors = ["#4BC0C0","#FF6384","#FFCE56","#36A2EB","#9966FF","#FF9F40"];
-  return colors[index % colors.length];
-}
-
-function renderTotalGoalsChart(data){
-  const totals = {};
-  for(const week in data){
-    for(const player in data[week]){
-      totals[player] = (totals[player]||0)+data[week][player];
+  function renderDropdown(){
+    weekSelect.innerHTML = '';
+    for(let i=1;i<=10;i++){
+      const opt = document.createElement('option');
+      opt.value = `Week ${i}`;
+      opt.textContent = `Week ${i}`;
+      weekSelect.appendChild(opt);
     }
   }
-  const sortedTotals = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
-  const labels = sortedTotals.map(e=>e[0]);
-  const values = sortedTotals.map(e=>e[1]);
 
-  const ctx = document.getElementById("totalGoalsChart").getContext("2d");
-  if(chartInstance) chartInstance.destroy();
+  function renderTables(data){
+    resultsDiv.innerHTML = '';
+    Object.keys(data).sort((a,b)=>{
+      return parseInt(a.split(' ')[1])-parseInt(b.split(' ')[1]);
+    }).forEach(week=>{
+      const weekData = data[week];
+      let tableHTML = `<div class="week-header">${week}</div><table><tr><th>Player</th><th>Goals</th><th>Remove</th></tr>`;
+      for(const player in weekData){
+        tableHTML += `<tr>
+          <td>${player}</td>
+          <td>${weekData[player]}</td>
+          <td><button onclick="removeGoal('${week}','${player}')">X</button></td>
+        </tr>`;
+      }
+      tableHTML += '</table>';
+      resultsDiv.innerHTML += tableHTML;
+    });
+  }
 
-  chartInstance = new Chart(ctx,{
-    type:"bar",
-    data:{ labels, datasets:[{
-      label:"Total Goals",
-      data: values,
-      backgroundColor: labels.map((_,i)=>getColor(i)),
-      borderRadius:10,
-      barThickness:25,
-      hoverBackgroundColor:"#00FFFF"
-    }]},
-    options:{
-      indexAxis:'y',
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{
-        legend:{ display:false },
-        tooltip:{
-          bodyFont:{size:16},
-          titleFont:{size:16,weight:'bold'},
-          padding:12,
-          backgroundColor:'#333',
-          titleColor:'#fff',
-          bodyColor:'#fff',
-          callbacks:{
-            label:function(context){
-              return `${context.label}: ${context.parsed.x} goal${context.parsed.x!==1?'s':''}`;
-            }
-          }
-        }
-      },
-      scales:{
-        x:{ beginAtZero:true, stepSize:1, ticks:{ color:'#e0e0e0', callback:v=>Number.isInteger(v)?v:null, precision:0 }, grid:{color:'#333'} },
-        y:{ grid:{color:'#333'}, ticks:{ font:{weight:'bold',size:24}, color:'#ffffff' } }
+  function renderChart(data){
+    const totals = {};
+    for(const week in data){
+      for(const player in data[week]){
+        totals[player] = (totals[player]||0)+data[week][player];
       }
     }
+    const sortedTotals = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+    const labels = sortedTotals.map(e=>e[0]);
+    const values = sortedTotals.map(e=>e[1]);
+
+    const ctx = document.getElementById('totalGoalsChart').getContext('2d');
+    if(chart) chart.destroy();
+    chart = new Chart(ctx,{
+      type:'bar',
+      data:{
+        labels,
+        datasets:[{
+          label:'Total Goals',
+          data: values,
+          backgroundColor: '#4BC0C0',
+          hoverBackgroundColor: '#ff9800',
+          borderRadius: 10
+        }]
+      },
+      options:{
+        indexAxis:'y',
+        responsive:true,
+        plugins:{legend:{display:false}},
+        scales:{
+          x:{beginAtZero:true, stepSize:1, ticks:{precision:0}, grid:{color:'#333'}},
+          y:{grid:{color:'#222'}, ticks:{font:{size:16, weight:'bold'}}}
+        }
+      }
+    });
+  }
+
+  // --- Add / remove goals ---
+  addGoalBtn.addEventListener('click',()=>{
+    const week = weekSelect.value;
+    const player = playerInput.value.trim();
+    const goals = parseInt(goalsInput.value);
+    if(!player || !goals || goals < 1) return alert('Enter a valid player name and goals');
+    const playerRef = db.ref(`goals/${week}/${player}`);
+    playerRef.set(goals);
+    playerInput.value=''; goalsInput.value='';
   });
-}
 
-// Add goal
-document.getElementById('addGoalBtn').addEventListener('click', ()=>{
-  const week = weekSelect.value;
-  const player = document.getElementById('playerInput').value.trim();
-  const goals = parseInt(document.getElementById('goalsInput').value);
-  if(!week || !player || isNaN(goals)||goals<1) return alert("Fill all fields correctly.");
-
-  const playerRef = db.ref(`goals/${week}/${player}`);
-  playerRef.once('value').then(snapshot=>{
-    const current = snapshot.val() || 0;
-    playerRef.set(current+goals);
-  });
-  document.getElementById('playerInput').value = '';
-  document.getElementById('goalsInput').value = '';
-});
-
-// Remove goal
-document.addEventListener('click', function(e){
-  if(e.target.classList.contains('remove-btn')){
-    const week = e.target.dataset.week;
-    const player = e.target.dataset.player;
-
-    if(confirm(`Are you sure you want to remove all goals for ${player} in ${week}?`)){
+  function removeGoal(week,player){
+    if(confirm(`Are you sure you want to remove ${player}'s goals for ${week}?`)){
       db.ref(`goals/${week}/${player}`).remove();
     }
   }
-});
 
-// Listen for realtime updates
-db.ref('goals').on('value', snapshot=>{
-  const data = snapshot.val() || {};
-  populateWeekDropdown(data);
-  renderTables(data);
-  renderTotalGoalsChart(data);
-});
-
-// Initialize
-document.addEventListener("DOMContentLoaded",()=>{
-  initWeeks();
-});
+  // --- Listen for changes ---
+  goalsRef.on('value', snapshot=>{
+    const data = snapshot.val();
+    if(data) renderAll(data);
+  });
 </script>
 </body>
 </html>
