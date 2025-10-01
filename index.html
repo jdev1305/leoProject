@@ -65,7 +65,7 @@ table tr:hover { background: #333; }
   table { display:block; overflow-x:auto; }
 }
 
-/* Optional taller chart on very large screens */
+/* Taller chart on very large screens */
 @media(min-width: 1200px){
   canvas { height: 400px; }
 }
@@ -137,7 +137,8 @@ function renderTotalGoalsChart() {
         data: values,
         backgroundColor: labels.map((_, i) => getColor(i)),
         borderRadius: 10,
-        hoverBackgroundColor: "#00a8a8"
+        hoverBackgroundColor: "#00a8a8",
+        barThickness: 20 // thinner bars
       }]
     },
     options: {
@@ -175,7 +176,7 @@ function renderTotalGoalsChart() {
         y: {
           grid: { color: "#333" },
           ticks: { 
-            font: { weight: 'bold', size: 18 },
+            font: { weight: 'bold', size: 22 }, // bigger player names
             color: '#ffffff'
           }
         }
