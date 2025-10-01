@@ -64,6 +64,7 @@
   <div class="chart-container">
     <canvas id="weeklyChart"></canvas>
     <canvas id="seasonChart"></canvas>
+    <canvas id="totalGoalsChart"></canvas>
   </div>
 
   <div id="results"></div>
@@ -100,86 +101,4 @@
           `;
         }
         tableHTML += "</table>";
-        resultsDiv.innerHTML += tableHTML;
-      }
-    }
-
-    // Weekly chart with gradient bars
-    function renderWeeklyChart() {
-      const ctx = document.getElementById("weeklyChart").getContext("2d");
-      const weeks = Object.keys(data);
-      const totals = weeks.map(week =>
-        Object.values(data[week]).reduce((a,b) => a + b, 0)
-      );
-
-      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient.addColorStop(0, "rgba(54, 162, 235, 0.9)");
-      gradient.addColorStop(1, "rgba(54, 162, 235, 0.5)");
-
-      new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: weeks,
-          datasets: [{
-            label: "Goals per Week",
-            data: totals,
-            backgroundColor: gradient,
-            borderRadius: 10,
-            hoverBackgroundColor: "rgba(54, 162, 235, 1)"
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: { beginAtZero: true, grid: { color: "#e0e0e0" } },
-            x: { grid: { color: "#f0f0f0" } }
-          }
-        }
-      });
-    }
-
-    // Season totals chart with gradient
-    function renderSeasonChart() {
-      const ctx = document.getElementById("seasonChart").getContext("2d");
-      const totals = {};
-      for (const week in data) {
-        for (const player in data[week]) {
-          if (!totals[player]) totals[player] = 0;
-          totals[player] += data[week][player];
-        }
-      }
-
-      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient.addColorStop(0, "rgba(255, 99, 132, 0.9)");
-      gradient.addColorStop(1, "rgba(255, 99, 132, 0.5)");
-
-      new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: Object.keys(totals),
-          datasets: [{
-            label: "Total Goals",
-            data: Object.values(totals),
-            backgroundColor: gradient,
-            borderRadius: 10,
-            hoverBackgroundColor: "rgba(255, 99, 132, 1)"
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: { beginAtZero: true, grid: { color: "#e0e0e0" } },
-            x: { grid: { color: "#f0f0f0" } }
-          }
-        }
-      });
-    }
-
-    renderTables();
-    renderWeeklyChart();
-    renderSeasonChart();
-  </script>
-</body>
-</html>
+        resultsDiv.innerHT
