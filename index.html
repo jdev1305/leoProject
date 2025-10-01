@@ -26,14 +26,14 @@ h1 {
   gap: 10px;
   margin-bottom: 30px;
 }
-.form-container input, .form-container button {
+.form-container input, .form-container select, .form-container button {
   padding: 8px 12px;
   font-size: 1rem;
   border-radius: 8px;
   border: none;
   outline: none;
 }
-.form-container input { min-width: 120px; }
+.form-container select { min-width: 140px; }
 .form-container button {
   background: #007bff;
   color: #fff;
@@ -112,12 +112,12 @@ table tr:hover { background: #333; transition: background 0.3s ease; }
 <h1>R.H.V.Leonidas H13 - Goals Tracker 25/26</h1>
 
 <div class="form-container">
-  <input type="text" id="weekInput" placeholder="Week Name">
+  <select id="weekSelect">
+    <!-- Options will be filled dynamically -->
+  </select>
   <input type="text" id="playerInput" placeholder="Player Name">
   <input type="number" id="goalsInput" placeholder="Goals" min="1">
   <button id="addGoalBtn">Add Goal</button>
-  <input type="text" id="newWeekInput" placeholder="New Week Name">
-  <button id="addWeekBtn">Add Week</button>
 </div>
 
 <div class="chart-container">
@@ -127,25 +127,47 @@ table tr:hover { background: #333; transition: background 0.3s ease; }
 <div id="results"></div>
 
 <script>
-// Load or initialize data
-let data = JSON.parse(localStorage.getItem('goalData')) || {
-  "Week 1": {},
-  "Week 2": {"Mees":1},
-  "Week 3": {},
-  "Week 4": {"Ernst":1,"Jacob":1,"Merijn":1}
-};
+// Initialize data with Week 1 → Week 10
+let data = JSON.parse(localStorage.getItem('goalData')) || {};
+for(let i=1;i<=10;i++){
+  const weekName = `Week ${i}`;
+  if(!data[weekName]) data[weekName] = {};
+}
+localStorage.setItem('goalData', JSON.stringify(data));
 
 const resultsDiv = document.getElementById("results");
+const weekSelect = document.getElementById("weekSelect");
 
-// Render tables with remove buttons
+// Populate week dropdown
+function populateWeekDropdown() {
+  weekSelect.innerHTML = "";
+  const sortedWeeks = Object.keys(data).sort((a,b)=>{
+    const numA = parseInt(a.match(/\d+/)?.[0]||0);
+    const numB = parseInt(b.match(/\d+/)?.[0]||0);
+    return numA - numB;
+  });
+  for(const week of sortedWeeks){
+    const option = document.createElement('option');
+    option.value = week;
+    option.textContent = week;
+    weekSelect.appendChild(option);
+  }
+}
+
+// Render tables
 function renderTables() {
   resultsDiv.innerHTML = "";
-  for (const week in data) {
+  const sortedWeeks = Object.keys(data).sort((a,b)=>{
+    const numA = parseInt(a.match(/\d+/)?.[0]||0);
+    const numB = parseInt(b.match(/\d+/)?.[0]||0);
+    return numA - numB;
+  });
+  for(const week of sortedWeeks){
     const weekData = data[week];
     const tableCard = document.createElement('div');
     tableCard.className = 'table-card';
     let tableHTML = `<div class="week-header">${week}</div><table><tr><th>Player</th><th>Goals</th></tr>`;
-    for (const player in weekData) {
+    for(const player in weekData){
       tableHTML += `<tr>
         <td>${player}</td>
         <td>${weekData[player]} 
@@ -160,102 +182,78 @@ function renderTables() {
 }
 
 // Dynamic colors for bars
-function getColor(index) {
+function getColor(index){
   const colors = ["#4BC0C0","#FF6384","#FFCE56","#36A2EB","#9966FF","#FF9F40"];
   return colors[index % colors.length];
 }
 
 let chartInstance = null;
-
-// Render horizontal total goals chart
-function renderTotalGoalsChart() {
+function renderTotalGoalsChart(){
   const totals = {};
-  for (const week in data) {
-    for (const player in data[week]) {
-      totals[player] = (totals[player] || 0) + data[week][player];
+  for(const week in data){
+    for(const player in data[week]){
+      totals[player] = (totals[player]||0)+data[week][player];
     }
   }
-
-  const sortedTotals = Object.entries(totals).sort((a,b) => b[1]-a[1]);
-  const labels = sortedTotals.map(e => e[0]);
-  const values = sortedTotals.map(e => e[1]);
+  const sortedTotals = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+  const labels = sortedTotals.map(e=>e[0]);
+  const values = sortedTotals.map(e=>e[1]);
 
   const ctx = document.getElementById("totalGoalsChart").getContext("2d");
   if(chartInstance) chartInstance.destroy();
 
-  chartInstance = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: labels,
-      datasets: [{
-        label: "Total Goals",
-        data: values,
-        backgroundColor: labels.map((_, i) => getColor(i)),
-        borderRadius: 10,
-        barThickness: 30,
-        hoverBackgroundColor: "#00FFFF"
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          bodyFont: { size: 16 },
-          titleFont: { size: 16, weight: 'bold' },
-          padding: 12,
-          backgroundColor: '#333',
-          titleColor: '#fff',
-          bodyColor: '#fff',
-          callbacks: {
-            label: function(context) {
-              return `${context.label}: ${context.parsed.x} goal${context.parsed.x !== 1 ? 's' : ''}`;
+  chartInstance = new Chart(ctx,{
+    type:"bar",
+    data:{ labels, datasets:[{
+      label:"Total Goals",
+      data: values,
+      backgroundColor: labels.map((_,i)=>getColor(i)),
+      borderRadius:10,
+      barThickness:30,
+      hoverBackgroundColor:"#00FFFF"
+    }]},
+    options:{
+      indexAxis:'y',
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{ display:false },
+        tooltip:{
+          bodyFont:{size:16},
+          titleFont:{size:16,weight:'bold'},
+          padding:12,
+          backgroundColor:'#333',
+          titleColor:'#fff',
+          bodyColor:'#fff',
+          callbacks:{
+            label:function(context){
+              return `${context.label}: ${context.parsed.x} goal${context.parsed.x!==1?'s':''}`;
             }
           }
         }
       },
-      scales: {
-        x: { beginAtZero: true, stepSize: 1, ticks: { color: '#e0e0e0', callback: v => Number.isInteger(v)?v:null, precision:0 }, grid:{ color:'#333' } },
-        y: { grid:{color:'#333'}, ticks:{ font:{weight:'bold', size:24}, color:'#ffffff' } }
+      scales:{
+        x:{ beginAtZero:true, stepSize:1, ticks:{ color:'#e0e0e0', callback:v=>Number.isInteger(v)?v:null, precision:0 }, grid:{color:'#333'} },
+        y:{ grid:{color:'#333'}, ticks:{ font:{weight:'bold',size:24}, color:'#ffffff' } }
       }
     }
   });
 }
 
-// Add goal from form
-document.getElementById('addGoalBtn').addEventListener('click', () => {
-  const week = document.getElementById('weekInput').value.trim();
+// Add goal handler
+document.getElementById('addGoalBtn').addEventListener('click', ()=>{
+  const week = weekSelect.value;
   const player = document.getElementById('playerInput').value.trim();
   const goals = parseInt(document.getElementById('goalsInput').value);
+  if(!week || !player || isNaN(goals)||goals<1) return alert("Fill all fields correctly.");
 
-  if(!week || !player || isNaN(goals) || goals < 1) return alert("Please fill in all fields correctly.");
-
-  if(!data[week]) data[week] = {};
-  data[week][player] = (data[week][player] || 0) + goals;
-
+  data[week][player] = (data[week][player]||0)+goals;
   localStorage.setItem('goalData', JSON.stringify(data));
   renderTables();
   renderTotalGoalsChart();
 
-  document.getElementById('weekInput').value = '';
   document.getElementById('playerInput').value = '';
   document.getElementById('goalsInput').value = '';
-});
-
-// Add new empty week
-document.getElementById('addWeekBtn').addEventListener('click', () => {
-  const week = document.getElementById('newWeekInput').value.trim();
-  if(!week) return alert("Please enter a week name.");
-  if(data[week]) return alert("Week already exists!");
-
-  data[week] = {}; // empty week with zero goals
-  localStorage.setItem('goalData', JSON.stringify(data));
-  renderTables();
-  renderTotalGoalsChart();
-
-  document.getElementById('newWeekInput').value = '';
 });
 
 // Remove goal handler with confirmation
@@ -266,8 +264,6 @@ document.addEventListener('click', function(e){
 
     if(confirm(`Are you sure you want to remove all goals for ${player} in ${week}?`)){
       delete data[week][player];
-      if(Object.keys(data[week]).length === 0) delete data[week];
-
       localStorage.setItem('goalData', JSON.stringify(data));
       renderTables();
       renderTotalGoalsChart();
@@ -276,9 +272,10 @@ document.addEventListener('click', function(e){
 });
 
 // Initialize
-document.addEventListener("DOMContentLoaded", () => {
-  renderTotalGoalsChart();
+document.addEventListener("DOMContentLoaded",()=>{
+  populateWeekDropdown();
   renderTables();
+  renderTotalGoalsChart();
 });
 </script>
 </body>
