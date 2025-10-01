@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>R.H.V.Leonidas H13 - Goals Tracker</title>
+<title>R.H.V.Leonidas H13 - Goals Tracker 25/26</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 body {
@@ -12,7 +12,11 @@ body {
 }
 h1 {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
+}
+h2 {
+  text-align: center;
+  margin-bottom: 15px;
 }
 .chart-container {
   display: flex;
@@ -54,11 +58,20 @@ th {
   background: #007bff;
   color: #fff;
 }
+table tr:nth-child(even) { background: #f2f2f2; }
+table tr:hover { background: #e0f7fa; }
+
+/* Responsive adjustments */
+@media(max-width: 600px){
+  canvas { width: 100%; }
+  table { display:block; overflow-x:auto; }
+}
 </style>
 </head>
 <body>
-<h1>R.H.V.Leonidas H13 - Goals Tracker</h1>
+<h1>R.H.V.Leonidas H13 - Goals Tracker 25/26</h1>
 
+<h2>🏆 Total Goals per Player</h2>
 <div class="chart-container">
   <canvas id="totalGoalsChart"></canvas>
 </div>
@@ -91,6 +104,12 @@ function renderTables() {
   }
 }
 
+// Generate dynamic colors for bars
+function getColor(index) {
+  const colors = ["#4BC0C0","#FF6384","#FFCE56","#36A2EB","#9966FF","#FF9F40"];
+  return colors[index % colors.length];
+}
+
 // Render horizontal total goals chart sorted highest to lowest
 function renderTotalGoalsChart() {
   const totals = {};
@@ -101,13 +120,11 @@ function renderTotalGoalsChart() {
   }
 
   // Sort descending
-  const sortedTotals = Object.entries(totals)
-    .sort((a,b) => b[1]-a[1]);
+  const sortedTotals = Object.entries(totals).sort((a,b) => b[1]-a[1]);
   const labels = sortedTotals.map(entry => entry[0]);
   const values = sortedTotals.map(entry => entry[1]);
 
   const ctx = document.getElementById("totalGoalsChart").getContext("2d");
-  const colors = ["#4BC0C0","#FF6384","#FFCE56","#36A2EB","#9966FF","#FF9F40"];
 
   new Chart(ctx, {
     type: "bar",
@@ -116,15 +133,24 @@ function renderTotalGoalsChart() {
       datasets: [{
         label: "Total Goals",
         data: values,
-        backgroundColor: colors.slice(0, labels.length),
+        backgroundColor: labels.map((_, i) => getColor(i)),
         borderRadius: 10,
         hoverBackgroundColor: "#00a8a8"
       }]
     },
     options: {
-      indexAxis: 'y', // horizontal
+      indexAxis: 'y',
       responsive: true,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `${context.label}: ${context.parsed.x} goal${context.parsed.x !== 1 ? 's' : ''}`;
+            }
+          }
+        }
+      },
       scales: {
         x: {
           beginAtZero: true,
@@ -137,7 +163,10 @@ function renderTotalGoalsChart() {
           },
           grid: { color: "#e0e0e0" }
         },
-        y: { grid: { color: "#f0f0f0" } }
+        y: {
+          grid: { color: "#f0f0f0" },
+          ticks: { font: { weight: 'bold' } } // bold player names
+        }
       }
     }
   });
