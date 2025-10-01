@@ -25,6 +25,7 @@
       background: #1e1e1e;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      height: 400px;
     }
     .week-container {
       max-width: 800px;
@@ -33,6 +34,7 @@
       border-radius: 12px;
       padding: 10px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      text-align: left;
     }
     .week-title {
       background: #007bff;
@@ -64,18 +66,22 @@
       color: white;
     }
     button {
-      padding: 8px 14px;
-      margin: 2px;
+      padding: 12px 18px;
+      margin: 4px;
       border: none;
       border-radius: 6px;
       font-weight: bold;
       cursor: pointer;
       color: white;
+      font-size: 16px;
     }
     .btn-add { background: #28a745; }
     .btn-remove { background: #dc3545; }
     .btn-minus { background: #ff9800; }
     .btn-action { background: #007bff; }
+    .add-player-row td {
+      padding-top: 12px;
+    }
   </style>
 </head>
 <body>
@@ -115,8 +121,11 @@
           totals[player] = (totals[player] || 0) + allData[week][player];
         }
       }
-      const labels = Object.keys(totals);
-      const data = Object.values(totals);
+
+      // Sort players by goals
+      const sorted = Object.entries(totals).sort((a,b) => b[1] - a[1]);
+      const labels = sorted.map(([p]) => p);
+      const data = sorted.map(([_,g]) => g);
       const colors = labels.map((_, i) => `hsl(${i*50}, 70%, 50%)`);
 
       if (chart) chart.destroy();
@@ -129,19 +138,33 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          scales: { x: { ticks: { color: "#fff" } }, y: { ticks: { color: "#fff" } } }
+          indexAxis: "y", // horizontal bars
+          scales: {
+            x: { ticks: { color: "#fff", precision:0 } },
+            y: { ticks: { color: "#fff" } }
+          }
         }
       });
     }
 
     // Render week table
     function renderWeek(week, data) {
+      const opponent = data._opponent || "";
       let html = `
         <div class="week-container">
           <div class="week-title">${week.replace("Week", "Week ")}</div>
           <table>
             <thead>
-              <tr><th>Player</th><th>Goals</th><th>Actions</th><th>Opponent</th></tr>
+              <tr>
+                <th>Player</th>
+                <th>Goals</th>
+                <th>Actions</th>
+                <th>
+                  Opponent: 
+                  <input type="text" value="${opponent}" 
+                    onchange="saveOpponent('${week}', this.value)">
+                </th>
+              </tr>
             </thead>
             <tbody>
       `;
@@ -156,20 +179,16 @@
               <button class="btn-minus" onclick="updateGoals('${week}','${player}',-1)">-1</button>
               <button class="btn-remove" onclick="removePlayer('${week}','${player}')">X</button>
             </td>
-            <td rowspan="1">
-              <input type="text" value="${data._opponent || ""}" 
-                onchange="saveOpponent('${week}', this.value)">
-            </td>
+            <td></td>
           </tr>
         `;
       }
       html += `
-            <tr>
-              <td colspan="3">
+            <tr class="add-player-row">
+              <td colspan="4">
                 <input type="text" id="newPlayer-${week}" placeholder="Player name">
                 <button class="btn-action" onclick="addPlayer('${week}')">Add Player</button>
               </td>
-              <td></td>
             </tr>
             </tbody>
           </table>
