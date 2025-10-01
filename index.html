@@ -8,12 +8,13 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      background: #111;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); /* gradient background */
       color: #fff;
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
       text-align: center;
+      min-height: 100vh;
     }
     h1 {
       margin: 20px 0;
@@ -30,7 +31,7 @@
     .week-container {
       max-width: 800px;
       margin: 20px auto;
-      background: linear-gradient(145deg, #2b2b2b, #1f1f1f); /* gradient background for tables */
+      background: linear-gradient(145deg, #2b2b2b, #1f1f1f);
       border-radius: 14px;
       padding: 10px;
       box-shadow: 0 6px 16px rgba(0,0,0,0.8);
@@ -52,7 +53,7 @@
       overflow: hidden;
     }
     thead tr {
-      background: linear-gradient(90deg, #2196f3, #00c6ff); /* smooth gradient header */
+      background: linear-gradient(90deg, #2196f3, #00c6ff);
     }
     th, td {
       padding: 10px;
@@ -60,7 +61,7 @@
       vertical-align: middle;
     }
     th {
-      background: transparent; /* let the row gradient show */
+      background: transparent;
       color: white;
     }
     th.opponent-header {
@@ -131,7 +132,6 @@
         }
       }
 
-      // Sort players by goals
       const sorted = Object.entries(totals).sort((a,b) => b[1] - a[1]);
       const labels = sorted.map(([p]) => p);
       const data = sorted.map(([_,g]) => g);
@@ -232,7 +232,6 @@
       db.ref("goals/" + week + "/_opponent").set(opponent);
     }
 
-    // Live sync
     db.ref("goals").on("value", snapshot => {
       const data = snapshot.val() || {};
       weeksContainer.innerHTML = "";
