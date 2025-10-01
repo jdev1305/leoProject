@@ -116,6 +116,8 @@ table tr:hover { background: #333; transition: background 0.3s ease; }
   <input type="text" id="playerInput" placeholder="Player Name">
   <input type="number" id="goalsInput" placeholder="Goals" min="1">
   <button id="addGoalBtn">Add Goal</button>
+  <input type="text" id="newWeekInput" placeholder="New Week Name">
+  <button id="addWeekBtn">Add Week</button>
 </div>
 
 <div class="chart-container">
@@ -240,6 +242,20 @@ document.getElementById('addGoalBtn').addEventListener('click', () => {
   document.getElementById('weekInput').value = '';
   document.getElementById('playerInput').value = '';
   document.getElementById('goalsInput').value = '';
+});
+
+// Add new empty week
+document.getElementById('addWeekBtn').addEventListener('click', () => {
+  const week = document.getElementById('newWeekInput').value.trim();
+  if(!week) return alert("Please enter a week name.");
+  if(data[week]) return alert("Week already exists!");
+
+  data[week] = {}; // empty week with zero goals
+  localStorage.setItem('goalData', JSON.stringify(data));
+  renderTables();
+  renderTotalGoalsChart();
+
+  document.getElementById('newWeekInput').value = '';
 });
 
 // Remove goal handler with confirmation
