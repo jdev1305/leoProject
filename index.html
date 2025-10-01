@@ -136,12 +136,13 @@ function renderTotalGoalsChart() {
         backgroundColor: labels.map((_, i) => getColor(i)),
         borderRadius: 10,
         hoverBackgroundColor: "#00a8a8",
-        barThickness: 20
+        barThickness: 30 // slightly thicker bars
       }]
     },
     options: {
       indexAxis: 'y',
       responsive: true,
+      maintainAspectRatio: false, // allow canvas height from CSS
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -174,7 +175,7 @@ function renderTotalGoalsChart() {
         y: {
           grid: { color: "#333" },
           ticks: { 
-            font: { weight: 'bold', size: 22 },
+            font: { weight: 'bold', size: 22 }, // big player names
             color: '#ffffff'
           }
         }
