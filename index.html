@@ -17,6 +17,10 @@
     .chart-container { display: flex; justify-content: center; margin-bottom: 30px; }
     canvas { max-width: 750px; width: 95%; background: #1e1e1e; padding: 10px; border-radius: 15px; }
     .week-header { margin-top: 30px; font-size: 1.4em; font-weight: bold; text-align: center; }
+    .opponent-box { text-align: center; margin: 8px 0; }
+    .opponent-box input { padding: 6px 8px; border-radius: 4px; border: none; font-size: 1em; }
+    .opponent-box button { padding: 6px 12px; border: none; border-radius: 6px; background: #17a2b8; color: #fff; cursor: pointer; margin-left: 5px; }
+    .opponent-box button:hover { background: #117a8b; }
     table { width: 100%; max-width: 750px; margin: 10px auto; border-collapse: collapse; background: #1e1e1e; border-radius: 8px; overflow: hidden; }
     th, td { border-bottom: 1px solid #333; padding: 10px; text-align: center; }
     th { background: #007bff; color: #fff; font-size: 1.1em; }
@@ -87,16 +91,26 @@
     function renderTables(data){
       resultsDiv.innerHTML = '';
 
-      // Always render 10 weeks
       for(let i=1;i<=10;i++){
         const week = `Week${i}`;
         const weekData = data[week] || {};
+        const opponentName = weekData["_opponent"] || "";
 
-        let tableHTML = `<div class="week-header">Week ${i}</div>
-        <table>
+        let tableHTML = `<div class="week-header">Week ${i}</div>`;
+
+        // Opponent input box
+        tableHTML += `<div class="opponent-box">
+          <input type="text" id="${week}-opponent" placeholder="Opponent name" value="${opponentName}">
+          <button onclick="saveOpponent('${week}')">Save Opponent</button>
+          ${opponentName ? `<div><em>Opponent: ${opponentName}</em></div>` : ""}
+        </div>`;
+
+        // Players table
+        tableHTML += `<table>
           <tr><th>Player</th><th>Goals</th><th>Actions</th></tr>`;
         
         for(const player in weekData){
+          if(player === "_opponent") continue; // skip special field
           tableHTML += `<tr>
             <td style="font-size:1.2em;font-weight:bold">${player}</td>
             <td>${weekData[player]}</td>
@@ -124,6 +138,7 @@
       const totals = {};
       for(const week in data){
         for(const player in data[week]){
+          if(player === "_opponent") continue;
           totals[player] = (totals[player]||0)+data[week][player];
         }
       }
@@ -131,12 +146,11 @@
       const labels = sortedTotals.map(e=>e[0]);
       const values = sortedTotals.map(e=>e[1]);
 
-      // Generate random colors for bars
+      // Generate random colors
       const colors = labels.map(() =>
         `hsl(${Math.floor(Math.random()*360)},70%,50%)`
       );
 
-      // Dynamically resize chart height
       const chartCanvas = document.getElementById('totalGoalsChart');
       const dynamicHeight = Math.max(labels.length * 40, 200);
       chartCanvas.style.height = dynamicHeight + 'px';
@@ -161,10 +175,17 @@
           plugins:{ legend:{ display:false }},
           scales:{
             x:{ beginAtZero:true, ticks:{ precision:0 }, grid:{ color:'#333' }},
-            y:{ grid:{ color:'#222' }, ticks:{ font:{ size:16, weight:'bold' }}}
+            y:{ grid:{ color:'#222' }, ticks:{ font:{ size:20, weight:'bold' }} } // bigger names
           }
         }
       });
+    }
+
+    // --- Save Opponent ---
+    function saveOpponent(week){
+      const opponentField = document.getElementById(`${week}-opponent`);
+      const opponent = opponentField.value.trim();
+      db.ref(`goals/${week}/_opponent`).set(opponent || null);
     }
 
     // --- Add Player ---
@@ -183,13 +204,11 @@
       goalsField.value = '';
     }
 
-    // --- Increment ---
     function incrementGoal(week, player){
       const playerRef = db.ref(`goals/${week}/${player}`);
       playerRef.transaction(currentValue => (currentValue || 0) + 1);
     }
 
-    // --- Decrement ---
     function decrementGoal(week, player){
       const playerRef = db.ref(`goals/${week}/${player}`);
       playerRef.transaction(currentValue => {
@@ -198,7 +217,6 @@
       });
     }
 
-    // --- Remove ---
     function removeGoal(week,player){
       if(confirm(`Remove ${player}'s goals for ${week}?`)){
         db.ref(`goals/${week}/${player}`).remove();
