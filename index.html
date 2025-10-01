@@ -14,10 +14,36 @@ body {
 }
 h1 {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
   font-weight: 700;
   font-size: 2rem;
   letter-spacing: 1px;
+}
+.form-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+.form-container input, .form-container button {
+  padding: 8px 12px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
+.form-container input {
+  min-width: 120px;
+}
+.form-container button {
+  background: #007bff;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.form-container button:hover {
+  background: #0056b3;
 }
 .chart-container {
   display: flex;
@@ -81,6 +107,13 @@ table tr:hover { background: #333; transition: background 0.3s ease; }
 <body>
 <h1>R.H.V.Leonidas H13 - Goals Tracker 25/26</h1>
 
+<div class="form-container">
+  <input type="text" id="weekInput" placeholder="Week Name">
+  <input type="text" id="playerInput" placeholder="Player Name">
+  <input type="number" id="goalsInput" placeholder="Goals" min="1">
+  <button id="addGoalBtn">Add Goal</button>
+</div>
+
 <div class="chart-container">
   <canvas id="totalGoalsChart"></canvas>
 </div>
@@ -89,7 +122,8 @@ table tr:hover { background: #333; transition: background 0.3s ease; }
 
 <script>
 // ========= DATA =========
-const data = {
+// Load from localStorage if available
+let data = JSON.parse(localStorage.getItem('goalData')) || {
   "Week 1": {},
   "Week 2": {"Mees":1},
   "Week 3": {},
@@ -122,6 +156,8 @@ function getColor(index) {
   return colors[index % colors.length];
 }
 
+let chartInstance = null;
+
 // Render horizontal total goals chart sorted highest to lowest
 function renderTotalGoalsChart() {
   const totals = {};
@@ -137,7 +173,9 @@ function renderTotalGoalsChart() {
 
   const ctx = document.getElementById("totalGoalsChart").getContext("2d");
 
-  new Chart(ctx, {
+  if(chartInstance) chartInstance.destroy();
+
+  chartInstance = new Chart(ctx, {
     type: "bar",
     data: {
       labels: labels,
@@ -194,6 +232,29 @@ function renderTotalGoalsChart() {
     }
   });
 }
+
+// Add new goal from form
+document.getElementById('addGoalBtn').addEventListener('click', () => {
+  const week = document.getElementById('weekInput').value.trim();
+  const player = document.getElementById('playerInput').value.trim();
+  const goals = parseInt(document.getElementById('goalsInput').value);
+
+  if(!week || !player || isNaN(goals) || goals < 1) return alert("Please fill in all fields correctly.");
+
+  if(!data[week]) data[week] = {};
+  data[week][player] = (data[week][player] || 0) + goals;
+
+  // Save to localStorage
+  localStorage.setItem('goalData', JSON.stringify(data));
+
+  renderTables();
+  renderTotalGoalsChart();
+
+  // Clear inputs
+  document.getElementById('weekInput').value = '';
+  document.getElementById('playerInput').value = '';
+  document.getElementById('goalsInput').value = '';
+});
 
 // Initialize chart and tables
 document.addEventListener("DOMContentLoaded", () => {
