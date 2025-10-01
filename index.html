@@ -78,35 +78,38 @@
 
     function renderTables(data){
       resultsDiv.innerHTML = '';
-      Object.keys(data).sort((a,b)=>parseInt(a.replace('Week',''))-parseInt(b.replace('Week','')))
-        .forEach(week=>{
-          const weekData = data[week];
-          let tableHTML = `<div class="week-header">${week}</div>
-          <table>
-            <tr><th>Player</th><th>Goals</th><th>Actions</th></tr>`;
-          
-          for(const player in weekData){
-            tableHTML += `<tr>
-              <td>${player}</td>
-              <td>${weekData[player]}</td>
-              <td>
-                <button onclick="incrementGoal('${week}','${player}')">+1</button>
-                <button onclick="decrementGoal('${week}','${player}')">-1</button>
-                <button class="remove-btn" onclick="removeGoal('${week}','${player}')">X</button>
-              </td>
-            </tr>`;
-          }
 
-          // Add player row
+      // Always render 10 weeks, even if empty
+      for(let i=1;i<=10;i++){
+        const week = `Week${i}`;
+        const weekData = data[week] || {};
+
+        let tableHTML = `<div class="week-header">Week ${i}</div>
+        <table>
+          <tr><th>Player</th><th>Goals</th><th>Actions</th></tr>`;
+        
+        for(const player in weekData){
           tableHTML += `<tr>
-            <td><input type="text" id="${week}-newPlayer" placeholder="Player name"></td>
-            <td><input type="number" id="${week}-newGoals" placeholder="Goals" min="1"></td>
-            <td><button onclick="addPlayer('${week}')">Add</button></td>
+            <td>${player}</td>
+            <td>${weekData[player]}</td>
+            <td>
+              <button onclick="incrementGoal('${week}','${player}')">+1</button>
+              <button onclick="decrementGoal('${week}','${player}')">-1</button>
+              <button class="remove-btn" onclick="removeGoal('${week}','${player}')">X</button>
+            </td>
           </tr>`;
+        }
 
-          tableHTML += '</table>';
-          resultsDiv.innerHTML += tableHTML;
-        });
+        // Add player row
+        tableHTML += `<tr>
+          <td><input type="text" id="${week}-newPlayer" placeholder="Player name"></td>
+          <td><input type="number" id="${week}-newGoals" placeholder="Goals" min="1"></td>
+          <td><button onclick="addPlayer('${week}')">Add</button></td>
+        </tr>`;
+
+        tableHTML += '</table>';
+        resultsDiv.innerHTML += tableHTML;
+      }
     }
 
     function renderChart(data){
