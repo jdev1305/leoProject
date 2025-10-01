@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Leonidas H13 Top Scorers</title>
+  <title>Leonidas Goals Tracker</title>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -22,20 +22,18 @@
       max-width: 800px;
       margin: 20px auto;
       padding: 20px;
-      background: #2a2a2a;
-      border: 1px solid #444;
+      background: #222;
       border-radius: 14px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.9);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.8);
       height: 400px;
     }
     .week-container {
       max-width: 800px;
       margin: 20px auto;
-      background: #2a2a2a;
-      border: 1px solid #444;
+      background: #222;
       border-radius: 14px;
-      padding: 15px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.9);
+      padding: 10px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.8);
       text-align: left;
     }
     .week-title {
@@ -53,33 +51,26 @@
     }
     th, td {
       padding: 10px;
-      border-bottom: 1px solid #444;
+      border-bottom: 1px solid #333;
       vertical-align: middle;
     }
     th {
       background: #007bff;
       color: white;
     }
-    .opponent-cell {
+    th.opponent-header {
       text-align: right;
     }
-    .opponent-input {
-      width: 160px;
+    input {
       padding: 6px;
+      margin: 4px;
       border-radius: 6px;
       border: none;
-      background: #333;
-      color: white;
-    }
-    input[type="text"] {
-      padding: 6px;
-      border-radius: 6px;
-      border: none;
-      background: #333;
+      background: #2c2c2c;
       color: white;
     }
     button {
-      padding: 16px 22px;
+      padding: 14px 20px; /* slightly bigger */
       margin: 4px;
       border: none;
       border-radius: 6px;
@@ -93,13 +84,12 @@
     .btn-minus { background: #ff9800; }
     .btn-action { background: #007bff; }
     .add-player-row td {
-      text-align: left; /* align Add Player to left */
       padding-top: 12px;
     }
   </style>
 </head>
 <body>
-  <h1>R.H.V.Leonidas H13 - Top Scorers 25/26</h1>
+  <h1>R.H.V.Leonidas H13 - Topscorers 25/26</h1>
 
   <!-- Chart -->
   <div class="chart-container">
@@ -135,6 +125,8 @@
           totals[player] = (totals[player] || 0) + allData[week][player];
         }
       }
+
+      // Sort players by goals
       const sorted = Object.entries(totals).sort((a,b) => b[1] - a[1]);
       const labels = sorted.map(([p]) => p);
       const data = sorted.map(([_,g]) => g);
@@ -150,8 +142,8 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          indexAxis: "y",
+          plugins: { legend: { display: false } }, // remove "Total Goals"
+          indexAxis: "y", // horizontal bars
           scales: {
             x: { ticks: { color: "#fff", precision:0 } },
             y: { ticks: { color: "#fff" } }
@@ -172,9 +164,9 @@
                 <th>Player</th>
                 <th>Goals</th>
                 <th>Actions</th>
-                <th class="opponent-cell">
+                <th class="opponent-header">
                   Opponent: 
-                  <input class="opponent-input" type="text" value="${opponent}" 
+                  <input type="text" value="${opponent}" 
                     onchange="saveOpponent('${week}', this.value)">
                 </th>
               </tr>
@@ -213,11 +205,15 @@
     // Update functions
     function updateGoals(week, player, delta) {
       const ref = db.ref("goals/" + week + "/" + player);
-      ref.transaction(current => (current || 0) + delta > 0 ? (current || 0) + delta : 0);
+      ref.transaction(current => {
+        return (current || 0) + delta > 0 ? (current || 0) + delta : 0;
+      });
     }
+
     function removePlayer(week, player) {
       db.ref("goals/" + week + "/" + player).remove();
     }
+
     function addPlayer(week) {
       const input = document.getElementById("newPlayer-" + week);
       const name = input.value.trim();
@@ -226,6 +222,7 @@
         input.value = "";
       }
     }
+
     function saveOpponent(week, opponent) {
       db.ref("goals/" + week + "/_opponent").set(opponent);
     }
