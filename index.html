@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Team Goalscorers Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f8f9fa;
+    }
+    h1 {
+      text-align: center;
+    }
+    .week-header {
+      margin-top: 30px;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    table {
+      width: 100%;
+      margin-top: 10px;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background: #007bff;
+      color: #fff;
+    }
+    canvas {
+      margin: 30px 0;
+      max-width: 700px;
+      background: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>⚽ Team Goalscorers Tracker</h1>
+
+  <div id="results"></div>
+
+  <h2 style="margin-top:40px;">📊 Weekly Goals Graph</h2>
+  <canvas id="weeklyChart"></canvas>
+
+  <h2 style="margin-top:40px;">🏆 Season Totals</h2>
+  <canvas id="seasonChart"></canvas>
+
+  <script>
+    // ========= EDIT THIS DATA =========
+    // Example structure: data[week][player] = goals
+    const data = {
+      "Week 1": { "Alice": 2, "Bob": 1, "Charlie": 1 },
+      "Week 2": { "Alice": 1, "David": 3 },
+      "Week 3": { "Charlie": 2, "Bob": 2, "Eve": 1 },
+      "Week 4": { "Alice": 2, "Charlie": 1 }
+    };
+    // ==================================
+
+    const resultsDiv = document.getElementById("results");
+
+    // Render tables for each week
+    function renderTables() {
+      for (const week in data) {
+        const weekData = data[week];
+        let tableHTML = `
+          <div class="week-header">${week}</div>
+          <table>
+            <tr>
+              <th>Player</th>
+              <th>Goals</th>
+            </tr>
+        `;
+        for (const player in weekData) {
+          tableHTML += `
+            <tr>
+              <td>${player}</td>
+              <td>${weekData[player]}</td>
+            </tr>
+          `;
+        }
+        tableHTML += "</table>";
+        resultsDiv.innerHTML += tableHTML;
+      }
+    }
+
+    // Prepare Weekly Chart (total goals per week)
+    function renderWeeklyChart() {
+      const weeks = Object.keys(data);
+      const totals = weeks.map(week =>
+        Object.values(data[week]).reduce((a, b) => a + b, 0)
+      );
+
+      new Chart(document.getElementById("weeklyChart"), {
+        type: "bar",
+        data: {
+          labels: weeks,
+          datasets: [{
+            label: "Goals per Week",
+            data: totals,
+            backgroundColor: "rgba(54, 162, 235, 0.7)"
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    // Prepare Season Totals Chart (per player)
+    function renderSeasonChart() {
+      const totals = {};
+      for (const week in data) {
+        for (const player in data[week]) {
+          if (!totals[player]) totals[player] = 0;
+          totals[player] += data[week][player];
+        }
+      }
+
+      new Chart(document.getElementById("seasonChart"), {
+        type: "bar",
+        data: {
+          labels: Object.keys(totals),
+          datasets: [{
+            label: "Total Goals",
+            data: Object.values(totals),
+            backgroundColor: "rgba(255, 99, 132, 0.7)"
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    // Render everything
+    renderTables();
+    renderWeeklyChart();
+    renderSeasonChart();
+  </script>
+</body>
+</html>
