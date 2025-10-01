@@ -7,12 +7,12 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; background: #121212; color: #fff; margin: 0; padding: 20px; }
-    h1 { text-align: center; }
-    .chart-container { width: 80%; max-width: 900px; height: 400px; margin: 20px auto; background:#1e1e1e; padding:20px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.5);}
-    .week-section { margin: 30px auto; max-width: 900px; }
-    .week-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; background:#007bff; color:#fff; display:inline-block; padding:8px 16px; border-radius:20px; }
-    table { width:100%; border-collapse:collapse; background:#1e1e1e; border-radius:12px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.6);}
+    body { font-family: Arial, sans-serif; background:#121212; color:#fff; margin:0; padding:20px; }
+    h1 { text-align:center; }
+    .chart-container { width:80%; max-width:900px; height:400px; margin:20px auto; background:#1e1e1e; padding:20px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.5); }
+    .week-section { margin:30px auto; max-width:900px; }
+    .week-title { font-size:20px; font-weight:bold; margin-bottom:10px; background:#007bff; color:#fff; display:inline-block; padding:8px 16px; border-radius:20px; }
+    table { width:100%; border-collapse:collapse; background:#1e1e1e; border-radius:12px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.6); }
     th, td { padding:12px; text-align:center; }
     th { background:#007bff; font-size:16px; }
     td { border-bottom:1px solid #333; }
@@ -27,13 +27,13 @@
 </head>
 <body>
   <h1>R.H.V.Leonidas H13 - Goals Tracker 25/26</h1>
-  
+
   <div class="chart-container">
     <canvas id="goalsChart"></canvas>
   </div>
-  
+
   <div id="weeks-container"></div>
-  
+
   <script>
     // Firebase v8 config
     var firebaseConfig = {
@@ -49,7 +49,7 @@
     var db = firebase.database();
 
     const weeksContainer = document.getElementById("weeks-container");
-    const ctx = document.getElementById('goalsChart').getContext('2d');
+    const ctx = document.getElementById("goalsChart").getContext("2d");
     let chart;
 
     function renderChart(data) {
@@ -61,15 +61,32 @@
           }
         });
       });
+
       const labels = Object.keys(playerGoals);
       const values = Object.values(playerGoals);
-      if(chart) chart.destroy();
+
+      if (chart) chart.destroy();
       chart = new Chart(ctx, {
-        type:'bar',
-        data:{labels:labels, datasets:[{label:'Total Goals', data:values, backgroundColor:['#ff4c4c','#ff9800','#ffc107','#4caf50','#2196f3','#9c27b0'], borderRadius:5, barThickness:40}]},
-        options:{responsive:true, maintainAspectRatio:false,
-          scales:{x:{ticks:{color:'white',font:{size:16}}}, y:{ticks:{color:'white',font:{size:14}}, beginAtZero:true}},
-          plugins:{legend:{labels:{color:'white'}}}}
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [{
+            label: "Total Goals",
+            data: values,
+            backgroundColor: ["#ff4c4c","#ff9800","#ffc107","#4caf50","#2196f3","#9c27b0"],
+            borderRadius: 5,
+            barThickness: 40
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { ticks: { color: "white", font: { size: 16 } } },
+            y: { ticks: { color: "white", font: { size: 14 } }, beginAtZero: true }
+          },
+          plugins: { legend: { labels: { color: "white" } } }
+        }
       });
     }
 
@@ -77,11 +94,12 @@
       weeksContainer.innerHTML = "";
       for (let i = 1; i <= 10; i++) {
         const weekKey = "Week" + i;
-        const weekData = data[weekKey] || {};
+        const weekData = data[weekKey] || {}; // safe fallback
         const opponent = weekData["_opponent"] || "";
 
         const section = document.createElement("div");
         section.className = "week-section";
+
         let rows = "";
         Object.entries(weekData).forEach(([player, goals]) => {
           if (player === "_opponent") return;
@@ -118,15 +136,27 @@
     }
 
     function updateGoal(week, player, delta) {
-      db.ref('goals/' + week + '/' + player).transaction(current => Math.max((current||0) + delta,0));
+      db.ref("goals/" + week + "/" + player).transaction(current => {
+        return Math.max((current || 0) + delta, 0);
+      });
     }
-    function removePlayer(week, player) { db.ref('goals/' + week + '/' + player).remove(); }
+
+    function removePlayer(week, player) {
+      db.ref("goals/" + week + "/" + player).remove();
+    }
+
     function addPlayer(week) {
       const input = document.getElementById("newPlayer-" + week);
       const name = input.value.trim();
-      if(name) { db.ref('goals/' + week + '/' + name).set(0); input.value=""; }
+      if (name) {
+        db.ref("goals/" + week + "/" + name).set(0);
+        input.value = "";
+      }
     }
-    function saveOpponent(week, name) { db.ref('goals/' + week + '/_opponent').set(name); }
+
+    function saveOpponent(week, name) {
+      db.ref("goals/" + week + "/_opponent").set(name);
+    }
 
     db.ref("goals").on("value", snap => {
       const data = snap.val() || {};
