@@ -77,6 +77,7 @@ const data = {
 
 const resultsDiv = document.getElementById("results");
 
+// Render weekly tables
 function renderTables() {
   resultsDiv.innerHTML = "";
   for (const week in data) {
@@ -90,6 +91,7 @@ function renderTables() {
   }
 }
 
+// Render total goals chart with integer y-axis
 function renderTotalGoalsChart() {
   const totals = {};
   for (const week in data) {
@@ -117,13 +119,23 @@ function renderTotalGoalsChart() {
       responsive: true,
       plugins: { legend: { display: false } },
       scales: {
-        y: { beginAtZero:true, stepSize:1, precision:0, grid:{color:"#e0e0e0"} },
-        x: { grid:{color:"#f0f0f0"} }
+        y: {
+          beginAtZero: true,
+          stepSize: 1, // 1 goal per tick
+          ticks: {
+            callback: function(value) {
+              return Number.isInteger(value) ? value : null; // show only whole numbers
+            }
+          },
+          grid: { color: "#e0e0e0" }
+        },
+        x: { grid: { color: "#f0f0f0" } }
       }
     }
   });
 }
 
+// Initialize chart and tables after DOM loads
 document.addEventListener("DOMContentLoaded", () => {
   renderTotalGoalsChart();
   renderTables();
