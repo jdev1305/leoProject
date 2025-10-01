@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <title>R.H.V.Leonidas H13 - Goals Tracker 25/26</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.29.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.29.0/firebase-database-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 body {
@@ -47,14 +49,13 @@ h1 {
   margin-bottom: 50px;
 }
 canvas {
-  max-width: 800px;
-  width: 90%;
+  max-width: 700px;
+  width: 80%;
   height: 300px;
   background: #1e1e1e;
   padding: 15px;
   border-radius: 15px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-  transition: all 0.3s ease;
 }
 .week-header {
   margin-top: 30px;
@@ -70,7 +71,6 @@ canvas {
   box-shadow: 0 8px 20px rgba(0,0,0,0.5);
   max-width: 800px;
   margin: 20px auto;
-  transition: all 0.3s ease;
 }
 table {
   width: 100%;
@@ -96,11 +96,10 @@ th {
   background: #ff4d4d;
   color: #fff;
   cursor: pointer;
-  transition: background 0.3s ease;
 }
 .remove-btn:hover { background: #cc0000; }
 table tr:nth-child(even) { background: #2a2a2a; }
-table tr:hover { background: #333; transition: background 0.3s ease; }
+table tr:hover { background: #333; }
 
 @media(max-width: 600px){
   canvas { width: 100%; height: 250px; }
@@ -112,9 +111,7 @@ table tr:hover { background: #333; transition: background 0.3s ease; }
 <h1>R.H.V.Leonidas H13 - Goals Tracker 25/26</h1>
 
 <div class="form-container">
-  <select id="weekSelect">
-    <!-- Options will be filled dynamically -->
-  </select>
+  <select id="weekSelect"></select>
   <input type="text" id="playerInput" placeholder="Player Name">
   <input type="number" id="goalsInput" placeholder="Goals" min="1">
   <button id="addGoalBtn">Add Goal</button>
@@ -127,19 +124,42 @@ table tr:hover { background: #333; transition: background 0.3s ease; }
 <div id="results"></div>
 
 <script>
-// Initialize data with Week 1 → Week 10
-let data = JSON.parse(localStorage.getItem('goalData')) || {};
-for(let i=1;i<=10;i++){
-  const weekName = `Week ${i}`;
-  if(!data[weekName]) data[weekName] = {};
-}
-localStorage.setItem('goalData', JSON.stringify(data));
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCjNY4jonCkxLhdS9MQCg382l2y6pmPOc4",
+  authDomain: "leonidasgoalstracker.firebaseapp.com",
+  databaseURL: "https://leonidasgoalstracker-default-rtdb.firebaseio.com",
+  projectId: "leonidasgoalstracker",
+  storageBucket: "leonidasgoalstracker.appspot.com",
+  messagingSenderId: "351370021203",
+  appId: "1:351370021203:web:8d0ca697abc1646d4079a6",
+  measurementId: "G-59JJEDNL8E"
+};
+
+// Initialize Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
 const resultsDiv = document.getElementById("results");
 const weekSelect = document.getElementById("weekSelect");
+let chartInstance = null;
 
-// Populate week dropdown
-function populateWeekDropdown() {
+// Populate week dropdown and ensure Weeks 1-10 exist
+function initWeeks(){
+  db.ref('goals').once('value', snapshot=>{
+    let data = snapshot.val() || {};
+    for(let i=1;i<=10;i++){
+      const weekName = `Week ${i}`;
+      if(!data[weekName]) data[weekName] = {};
+    }
+    db.ref('goals').set(data);
+    populateWeekDropdown(data);
+    renderTables(data);
+    renderTotalGoalsChart(data);
+  });
+}
+
+function populateWeekDropdown(data){
   weekSelect.innerHTML = "";
   const sortedWeeks = Object.keys(data).sort((a,b)=>{
     const numA = parseInt(a.match(/\d+/)?.[0]||0);
@@ -154,8 +174,7 @@ function populateWeekDropdown() {
   }
 }
 
-// Render tables
-function renderTables() {
+function renderTables(data){
   resultsDiv.innerHTML = "";
   const sortedWeeks = Object.keys(data).sort((a,b)=>{
     const numA = parseInt(a.match(/\d+/)?.[0]||0);
@@ -181,14 +200,12 @@ function renderTables() {
   }
 }
 
-// Dynamic colors for bars
 function getColor(index){
   const colors = ["#4BC0C0","#FF6384","#FFCE56","#36A2EB","#9966FF","#FF9F40"];
   return colors[index % colors.length];
 }
 
-let chartInstance = null;
-function renderTotalGoalsChart(){
+function renderTotalGoalsChart(data){
   const totals = {};
   for(const week in data){
     for(const player in data[week]){
@@ -209,7 +226,7 @@ function renderTotalGoalsChart(){
       data: values,
       backgroundColor: labels.map((_,i)=>getColor(i)),
       borderRadius:10,
-      barThickness:30,
+      barThickness:25,
       hoverBackgroundColor:"#00FFFF"
     }]},
     options:{
@@ -240,42 +257,45 @@ function renderTotalGoalsChart(){
   });
 }
 
-// Add goal handler
+// Add goal
 document.getElementById('addGoalBtn').addEventListener('click', ()=>{
   const week = weekSelect.value;
   const player = document.getElementById('playerInput').value.trim();
   const goals = parseInt(document.getElementById('goalsInput').value);
   if(!week || !player || isNaN(goals)||goals<1) return alert("Fill all fields correctly.");
 
-  data[week][player] = (data[week][player]||0)+goals;
-  localStorage.setItem('goalData', JSON.stringify(data));
-  renderTables();
-  renderTotalGoalsChart();
-
+  const playerRef = db.ref(`goals/${week}/${player}`);
+  playerRef.once('value').then(snapshot=>{
+    const current = snapshot.val() || 0;
+    playerRef.set(current+goals);
+  });
   document.getElementById('playerInput').value = '';
   document.getElementById('goalsInput').value = '';
 });
 
-// Remove goal handler with confirmation
+// Remove goal
 document.addEventListener('click', function(e){
   if(e.target.classList.contains('remove-btn')){
     const week = e.target.dataset.week;
     const player = e.target.dataset.player;
 
     if(confirm(`Are you sure you want to remove all goals for ${player} in ${week}?`)){
-      delete data[week][player];
-      localStorage.setItem('goalData', JSON.stringify(data));
-      renderTables();
-      renderTotalGoalsChart();
+      db.ref(`goals/${week}/${player}`).remove();
     }
   }
 });
 
+// Listen for realtime updates
+db.ref('goals').on('value', snapshot=>{
+  const data = snapshot.val() || {};
+  populateWeekDropdown(data);
+  renderTables(data);
+  renderTotalGoalsChart(data);
+});
+
 // Initialize
 document.addEventListener("DOMContentLoaded",()=>{
-  populateWeekDropdown();
-  renderTables();
-  renderTotalGoalsChart();
+  initWeeks();
 });
 </script>
 </body>
