@@ -2,98 +2,100 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>R.H.V.Leonidas H13 - Goals Tracker 25/26</title>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<title>Leonidas Goals Tracker</title>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-  body { font-family: Arial, sans-serif; background: #121212; color: #f0f0f0; margin: 20px; }
-  h1 { text-align: center; margin-bottom: 20px; }
-
-  /* Chart container styled as card */
-  .chart-container { 
-    display: flex; 
-    justify-content: center; 
-    margin-bottom: 30px; 
+  body {
+    font-family: Arial, sans-serif;
+    background: #121212;
+    color: #f0f0f0;
+    margin: 20px;
   }
-  canvas { 
-    max-width: 750px; 
-    max-height: 450px;  
-    width: 100%; 
-    background: #2b2b2b;   /* lighter contrast */
-    padding: 15px; 
-    border-radius: 16px; 
-    box-shadow: 0 4px 20px rgba(0,0,0,0.8); 
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #fff;
   }
-
-  .week-header { 
-    margin-top: 40px; 
-    font-size: 1.4em; 
-    font-weight: bold; 
-    text-align: center; 
-    background: #007bff; 
-    color: #fff; 
-    display: inline-block; 
-    padding: 6px 16px; 
-    border-radius: 20px; 
-    box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+  .chart-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
   }
-
-  /* Table styled as card */
-  table { 
-    width: 100%; 
-    max-width: 900px; 
-    margin: 20px auto; 
-    border-collapse: collapse; 
-    background: #2b2b2b;   /* lighter contrast */
-    border-radius: 16px; 
-    overflow: hidden; 
-    box-shadow: 0 4px 20px rgba(0,0,0,0.8); 
+  canvas {
+    max-width: 800px;
+    width: 100%;
+    background: #1f1f1f;
+    padding: 15px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.7);
   }
-  th, td { border-bottom: 1px solid #444; padding: 12px; text-align: center; }
-  th { background: #007bff; color: #fff; font-size: 1.1em; }
-  tr:last-child td { border-bottom: none; }
-
-  /* Unified button style */
-  td button { 
-    border: none; 
-    padding: 12px 18px; 
-    border-radius: 6px; 
-    cursor: pointer; 
-    font-size: 1em; 
-    font-weight: bold; 
-    background: #007bff; 
-    color: #fff; 
-    margin: 0 4px;
-    transition: background 0.2s ease, transform 0.1s ease;
+  .week-card {
+    max-width: 900px;
+    margin: 30px auto;
+    background: #2b2b2b;
+    border-radius: 16px;
+    padding: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.8);
   }
-  td button:hover { background: #0056b3; transform: scale(1.05); }
-
-  /* Remove button stays red */
-  .btn-remove { background: #dc3545; }
-  .btn-remove:hover { background: #b52a37; }
-
-  /* Add player row */
-  .form-container { max-width: 900px; margin: 10px auto; display: flex; justify-content: center; gap: 10px; }
-  .form-container input { padding: 10px 14px; border-radius: 6px; border: none; font-size: 1em; flex: 1; background: #3a3a3a; color: #f0f0f0; }
-  .form-container button { padding: 12px 18px; border-radius: 6px; border: none; background: #007bff; color: #fff; cursor: pointer; font-size: 1.05em; font-weight: bold; }
-  .form-container button:hover { background: #0056b3; }
-
-  /* Opponent input field */
-  input[type="text"][placeholder="Opponent"] {
-    width: 90%;
-    padding: 8px;
+  .week-header {
+    text-align: center;
+    font-size: 1.4em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #fff;
+    background: #007bff;
+    padding: 6px 16px;
+    border-radius: 10px;
+    display: inline-block;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #1e1e1e;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: 10px;
+    text-align: center;
+  }
+  th {
+    background: #007bff;
+    color: #fff;
+  }
+  tr:nth-child(even) {
+    background: #2a2a2a;
+  }
+  input[type="text"] {
+    padding: 6px 10px;
     border-radius: 6px;
     border: none;
     font-size: 1em;
-    text-align: center;
-    background: #3a3a3a; 
-    color: #f0f0f0;
+    background: #333;
+    color: #fff;
   }
+  button {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 2px;
+    transition: background 0.2s;
+  }
+  .btn-add { background: #007bff; }
+  .btn-add:hover { background: #0056b3; }
+  .btn-minus { background: #ff9800; }
+  .btn-minus:hover { background: #e68900; }
+  .btn-remove { background: #e53935; }
+  .btn-remove:hover { background: #c62828; }
 </style>
 </head>
 <body>
-<h1>R.H.V.Leonidas H13 - Goals Tracker 25/26</h1>
+<h1>R.H.V. Leonidas H13 - Goals Tracker 25/26</h1>
 
 <div class="chart-container">
   <canvas id="totalGoalsChart"></canvas>
@@ -102,6 +104,7 @@
 <div id="results"></div>
 
 <script>
+  // --- Firebase config ---
   const firebaseConfig = {
     apiKey: "AIzaSyCjNY4jonCkxLhdS9MQCg382l2y6pmPOc4",
     authDomain: "leonidasgoalstracker.firebaseapp.com",
@@ -109,8 +112,7 @@
     projectId: "leonidasgoalstracker",
     storageBucket: "leonidasgoalstracker.appspot.com",
     messagingSenderId: "351370021203",
-    appId: "1:351370021203:web:8d0ca697abc1646d4079a6",
-    measurementId: "G-59JJEDNL8E"
+    appId: "1:351370021203:web:8d0ca697abc1646d4079a6"
   };
 
   const app = firebase.initializeApp(firebaseConfig);
@@ -121,7 +123,7 @@
   const goalsRef = db.ref('goals');
 
   goalsRef.on('value', snap => {
-    const data = snap.val() || {};
+    let data = snap.val() || {};
     renderAll(data);
   });
 
@@ -129,22 +131,27 @@
     resultsDiv.innerHTML = '';
     for (let i=1; i<=10; i++) {
       const weekKey = `Week${i}`;
-      const displayName = `Week ${i}`; // add space between Week and number
-      renderWeekTable(weekKey, data[weekKey] || {}, displayName);
+      if (!data[weekKey]) data[weekKey] = {};
     }
+    Object.keys(data)
+      .sort((a,b)=>parseInt(a.replace('Week',''))-parseInt(b.replace('Week','')))
+      .forEach(week=>{
+        renderWeekTable(week, data[week], `Week ${week.replace('Week','')}`);
+      });
     renderChart(data);
   }
 
   function renderWeekTable(weekKey, weekData, displayName){
     let tableHTML = `
-      <div class="week-header">${displayName}</div>
-      <table>
-        <tr>
-          <th>Player</th>
-          <th>Goals</th>
-          <th>Actions</th>
-          <th>Opponent</th>
-        </tr>
+      <div class="week-card">
+        <div class="week-header">${displayName}</div>
+        <table>
+          <tr>
+            <th>Player</th>
+            <th>Goals</th>
+            <th>Actions</th>
+            <th>Opponent</th>
+          </tr>
     `;
 
     const opponent = weekData._opponent || "";
@@ -165,8 +172,8 @@
           <td style="font-size:1.1em; font-weight:bold;">${player}</td>
           <td>${weekData[player]}</td>
           <td>
-            <button onclick="updateGoals('${weekKey}','${player}',1)">+1</button>
-            <button onclick="updateGoals('${weekKey}','${player}',-1)">-1</button>
+            <button class="btn-add" onclick="updateGoals('${weekKey}','${player}',1)">+1</button>
+            <button class="btn-minus" onclick="updateGoals('${weekKey}','${player}',-1)">-1</button>
             <button class="btn-remove" onclick="removeGoal('${weekKey}','${player}')">X</button>
           </td>
           <td></td>
@@ -177,15 +184,17 @@
     tableHTML += `
       <tr>
         <td colspan="4">
-          <div class="form-container">
-            <input type="text" id="player-${weekKey}" placeholder="Player name">
-            <button onclick="addPlayer('${weekKey}')">Add Player</button>
-          </div>
+          <input type="text" id="player-${weekKey}" placeholder="Player name">
+          <button class="btn-add" onclick="addPlayer('${weekKey}')">Add Player</button>
         </td>
       </tr>
     `;
 
-    tableHTML += '</table>';
+    tableHTML += `
+        </table>
+      </div>
+    `;
+
     resultsDiv.innerHTML += tableHTML;
   }
 
@@ -201,24 +210,26 @@
     const labels = sortedTotals.map(e=>e[0]);
     const values = sortedTotals.map(e=>e[1]);
 
-    const colors = labels.map((_,i)=>`hsl(${i*50 % 360},70%,50%)`);
-
     const ctx = document.getElementById('totalGoalsChart').getContext('2d');
     if(chart) chart.destroy();
     chart = new Chart(ctx,{
       type:'bar',
       data:{
         labels,
-        datasets:[{label:'Total Goals', data:values, backgroundColor:colors, borderRadius:6, barThickness:25}]
+        datasets:[{
+          label:'Total Goals',
+          data:values,
+          backgroundColor: labels.map((_,i)=>`hsl(${i*40},70%,50%)`),
+          borderRadius:8
+        }]
       },
       options:{
         indexAxis:'y',
         responsive:true,
-        maintainAspectRatio:false,
         plugins:{legend:{display:false}},
         scales:{
-          x:{beginAtZero:true, ticks:{precision:0, color:'#fff'}, grid:{color:'#333'}},
-          y:{ticks:{font:{size:22, weight:'bold'}, color:'#fff'}, grid:{color:'#222'}}
+          x:{beginAtZero:true, ticks:{precision:0}, grid:{color:'#444'}},
+          y:{ticks:{font:{size:18, weight:'bold'}}, grid:{color:'#333'}}
         }
       }
     });
@@ -226,30 +237,25 @@
 
   function addPlayer(week){
     const input = document.getElementById(`player-${week}`);
-    const player = input.value.trim();
-    if(!player) return;
-    db.ref(`goals/${week}/${player}`).set(0);
+    const name = input.value.trim();
+    if(!name) return;
+    db.ref(`goals/${week}/${name}`).set(0);
     input.value='';
   }
 
   function updateGoals(week, player, delta){
     const ref = db.ref(`goals/${week}/${player}`);
-    ref.once('value').then(snap=>{
-      let val = snap.val()||0;
-      val += delta;
-      if(val < 0) val = 0;
-      ref.set(val);
-    });
+    ref.transaction(current=> (current||0)+delta < 0 ? 0 : (current||0)+delta);
   }
 
-  function removeGoal(week,player){
+  function removeGoal(week, player){
     if(confirm(`Remove ${player} from ${week}?`)){
       db.ref(`goals/${week}/${player}`).remove();
     }
   }
 
-  function saveOpponent(week, name){
-    db.ref(`goals/${week}/_opponent`).set(name);
+  function saveOpponent(week, opponent){
+    db.ref(`goals/${week}/_opponent`).set(opponent);
   }
 </script>
 </body>
