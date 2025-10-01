@@ -2,18 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Firebase Debug - Leonidas Goals</title>
-  <!-- Firebase v8 scripts (global firebase object available immediately) -->
+  <title>R.H.V.Leonidas H13 - Goals Tracker 25/26</title>
+
+  <!-- Firebase v8 SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body { font-family: Arial; background: #121212; color: #f0f0f0; margin: 20px; }
+    h1 { text-align: center; margin-bottom: 20px; }
+    .chart-container { display: flex; justify-content: center; margin-bottom: 30px; }
+    canvas { max-width: 650px; width: 90%; background: #1e1e1e; padding: 10px; border-radius: 15px; }
+    .week-header { margin-top: 20px; font-size: 1.2em; font-weight: bold; text-align: center; }
+    table { width: 100%; max-width: 650px; margin: 10px auto; border-collapse: collapse; background: #1e1e1e; border-radius: 8px; overflow: hidden; }
+    th, td { border-bottom: 1px solid #333; padding: 8px; text-align: center; }
+    th { background: #007bff; color: #fff; }
+    td button { background: #ff4d4d; color: #fff; border: none; padding: 2px 6px; border-radius: 4px; cursor: pointer; }
+    td button:hover { background: #ff1a1a; }
+    .form-container { max-width: 650px; margin: 20px auto; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+    .form-container input, .form-container select { padding: 6px 10px; border-radius: 6px; border: none; font-size: 1em; }
+    .form-container button { padding: 6px 12px; border-radius: 6px; border: none; background: #007bff; color: #fff; cursor: pointer; }
+    .form-container button:hover { background: #0056b3; }
+  </style>
 </head>
 <body>
-  <h1>Firebase Debug - Leonidas Goals</h1>
-  <pre id="output">Loading...</pre>
+  <h1>R.H.V.Leonidas H13 - Goals Tracker 25/26</h1>
+
+  <div class="form-container">
+    <select id="weekSelect"></select>
+    <input type="text" id="playerInput" placeholder="Player name">
+    <input type="number" id="goalsInput" placeholder="Goals" min="1">
+    <button id="addGoalBtn">Add Goal</button>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="totalGoalsChart"></canvas>
+  </div>
+
+  <div id="results"></div>
 
   <script>
-    console.log("Firebase at start:", window.firebase);
-
+    // --- Firebase Config ---
     const firebaseConfig = {
       apiKey: "AIzaSyCjNY4jonCkxLhdS9MQCg382l2y6pmPOc4",
       authDomain: "leonidasgoalstracker.firebaseapp.com",
@@ -25,16 +57,111 @@
       measurementId: "G-59JJEDNL8E"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
-
     const db = firebase.database();
 
-    // Listen to "goals"
-    db.ref("goals").on("value", snap => {
-      document.getElementById("output").textContent =
-        JSON.stringify(snap.val(), null, 2);
+    const resultsDiv = document.getElementById("results");
+    const weekSelect = document.getElementById("weekSelect");
+    const playerInput = document.getElementById("playerInput");
+    const goalsInput = document.getElementById("goalsInput");
+    const addGoalBtn = document.getElementById("addGoalBtn");
+    let chart;
+
+    const goalsRef = db.ref('goals');
+
+    // --- Ensure Weeks 1–10 exist ---
+    goalsRef.once('value').then(snapshot => {
+      let data = snapshot.val() || {};
+      for (let i=1; i<=10; i++) {
+        if (!data[`Week${i}`]) data[`Week${i}`] = {};
+      }
+      goalsRef.set(data, () => {
+        goalsRef.on('value', snap => {
+          const data = snap.val();
+          if (data) renderAll(data);
+        });
+      });
     });
+
+    function renderAll(data){
+      renderDropdown();
+      renderTables(data);
+      renderChart(data);
+    }
+
+    function renderDropdown(){
+      weekSelect.innerHTML = '';
+      for(let i=1;i<=10;i++){
+        const opt = document.createElement('option');
+        opt.value = `Week${i}`;
+        opt.textContent = `Week ${i}`;
+        weekSelect.appendChild(opt);
+      }
+    }
+
+    function renderTables(data){
+      resultsDiv.innerHTML = '';
+      Object.keys(data).sort((a,b)=>parseInt(a.replace('Week',''))-parseInt(b.replace('Week','')))
+        .forEach(week=>{
+          const weekData = data[week];
+          let tableHTML = `<div class="week-header">${week}</div><table><tr><th>Player</th><th>Goals</th><th>Remove</th></tr>`;
+          for(const player in weekData){
+            tableHTML += `<tr>
+              <td>${player}</td>
+              <td>${weekData[player]}</td>
+              <td><button onclick="removeGoal('${week}','${player}')">X</button></td>
+            </tr>`;
+          }
+          tableHTML += '</table>';
+          resultsDiv.innerHTML += tableHTML;
+        });
+    }
+
+    function renderChart(data){
+      const totals = {};
+      for(const week in data){
+        for(const player in data[week]){
+          totals[player] = (totals[player]||0)+data[week][player];
+        }
+      }
+      const sortedTotals = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+      const labels = sortedTotals.map(e=>e[0]);
+      const values = sortedTotals.map(e=>e[1]);
+
+      const ctx = document.getElementById('totalGoalsChart').getContext('2d');
+      if(chart) chart.destroy();
+      chart = new Chart(ctx,{
+        type:'bar',
+        data:{
+          labels,
+          datasets:[{label:'Total Goals', data:values, backgroundColor:'#4BC0C0', hoverBackgroundColor:'#ff9800', borderRadius:10}]
+        },
+        options:{
+          indexAxis:'y',
+          responsive:true,
+          plugins:{legend:{display:false}},
+          scales:{
+            x:{beginAtZero:true, ticks:{precision:0}, grid:{color:'#333'}},
+            y:{grid:{color:'#222'}, ticks:{font:{size:18, weight:'bold'}}}
+          }
+        }
+      });
+    }
+
+    addGoalBtn.addEventListener('click',()=>{
+      const week = weekSelect.value;
+      const player = playerInput.value.trim();
+      const goals = parseInt(goalsInput.value);
+      if(!player || !goals || goals < 1) return alert('Enter valid player and goals');
+      db.ref(`goals/${week}/${player}`).set(goals);
+      playerInput.value=''; goalsInput.value='';
+    });
+
+    function removeGoal(week,player){
+      if(confirm(`Are you sure you want to remove ${player}'s goals for ${week}?`)){
+        db.ref(`goals/${week}/${player}`).remove();
+      }
+    }
   </script>
 </body>
 </html>
