@@ -19,27 +19,25 @@
       margin: 20px 0;
     }
     .chart-container {
-      width: 800px; /* force same width as tables */
+      max-width: 800px; /* same as tables */
       margin: 20px auto;
       padding: 20px;
-      background: #333;
+      background: #2a2a2a;
       border-radius: 14px;
-      border: 1px solid #555;
       box-shadow: 0 6px 16px rgba(0,0,0,0.8);
       height: 400px;
     }
     .week-container {
       max-width: 800px;
       margin: 20px auto;
-      background: #333;
+      background: #2a2a2a;
       border-radius: 14px;
-      border: 1px solid #555;
       padding: 10px;
       box-shadow: 0 6px 16px rgba(0,0,0,0.8);
       text-align: left;
     }
     .week-title {
-      background: #3a86ff; /* modern sleek blue */
+      background: linear-gradient(135deg, #3a86ff, #00b4d8);
       display: inline-block;
       padding: 6px 14px;
       border-radius: 20px;
@@ -53,11 +51,11 @@
     }
     th, td {
       padding: 10px;
-      border-bottom: 1px solid #444;
+      border-bottom: 1px solid #333;
       vertical-align: middle;
     }
     th {
-      background: #3a86ff; /* modern sleek blue */
+      background: linear-gradient(135deg, #3a86ff, #00b4d8);
       color: white;
     }
     th.opponent-header {
@@ -84,7 +82,9 @@
     .btn-add { background: #28a745; }
     .btn-remove { background: #dc3545; }
     .btn-minus { background: #ff9800; }
-    .btn-action { background: #3a86ff; } /* updated */
+    .btn-action { 
+      background: linear-gradient(135deg, #3a86ff, #00b4d8);
+    }
     .add-player-row td {
       padding-top: 12px;
     }
@@ -145,7 +145,7 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
-          indexAxis: "y",
+          indexAxis: "y", // horizontal bars
           scales: {
             x: { ticks: { color: "#fff", precision:0 } },
             y: { ticks: { color: "#fff" } }
