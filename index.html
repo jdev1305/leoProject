@@ -1,115 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>R.H.V.Leonidas H13 - Goals Tracker 25/26</title>
-
-  <!-- Firebase v8 SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-    body { font-family: Arial; background: #121212; color: #f0f0f0; margin: 20px; }
-    h1 { text-align: center; margin-bottom: 20px; }
-    .chart-container { display: flex; justify-content: center; margin-bottom: 30px; }
-    canvas { max-width: 750px; width: 95%; background: #1e1e1e; padding: 10px; border-radius: 15px; }
-    .week-header { margin-top: 30px; font-size: 1.4em; font-weight: bold; text-align: center; }
-    table { width: 100%; max-width: 750px; margin: 10px auto; border-collapse: collapse; background: #1e1e1e; border-radius: 8px; overflow: hidden; }
-    th, td { border-bottom: 1px solid #333; padding: 10px; text-align: center; }
-    th { background: #007bff; color: #fff; font-size: 1.1em; }
-    td { font-size: 1.1em; }
-    input { padding: 6px 8px; border-radius: 4px; border: none; font-size: 1em; }
-
-    /* Buttons */
-    td button { border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; margin: 0 2px; font-size: 1em; font-weight: bold; color: #fff; }
-    .btn-add { background: #007bff; }
-    .btn-add:hover { background: #0056b3; }
-    .btn-plus { background: #28a745; }
-    .btn-plus:hover { background: #1e7e34; }
-    .btn-minus { background: #ff9800; }
-    .btn-minus:hover { background: #e68900; }
-    .btn-remove { background: #ff4d4d; }
-    .btn-remove:hover { background: #ff1a1a; }
-  </style>
+<meta charset="UTF-8">
+<title>R.H.V.Leonidas H13 - Goals Tracker 25/26</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; background: #121212; color: #f0f0f0; margin: 20px; }
+  h1 { text-align: center; margin-bottom: 20px; }
+  .chart-container { display: flex; justify-content: center; margin-bottom: 30px; }
+  canvas { max-width: 750px; width: 100%; background: #1e1e1e; padding: 10px; border-radius: 15px; }
+  .week-header { margin-top: 30px; font-size: 1.4em; font-weight: bold; text-align: center; }
+  table { width: 100%; max-width: 750px; margin: 10px auto; border-collapse: collapse; background: #1e1e1e; border-radius: 8px; overflow: hidden; }
+  th, td { border-bottom: 1px solid #333; padding: 10px; text-align: center; }
+  th { background: #007bff; color: #fff; }
+  td button { border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 1em; }
+  .btn-plus { background: #4caf50; color: #fff; }
+  .btn-plus:hover { background: #388e3c; }
+  .btn-minus { background: #ff9800; color: #fff; }
+  .btn-minus:hover { background: #e68900; }
+  .btn-remove { background: #f44336; color: #fff; }
+  .btn-remove:hover { background: #d32f2f; }
+  .btn-add { background: #2196f3; color: #fff; }
+  .btn-add:hover { background: #1976d2; }
+  .opponent-bar { display: flex; justify-content: flex-end; align-items: center; margin: 8px auto; max-width: 750px; gap: 10px; }
+  .opponent-bar input { padding: 6px 10px; border-radius: 6px; border: none; font-size: 1em; width: 200px; }
+  .btn-opponent { background: #9c27b0; color: #fff; padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+  .btn-opponent:hover { background: #7b1fa2; }
+</style>
 </head>
 <body>
-  <h1>R.H.V.Leonidas H13 - Goals Tracker 25/26</h1>
+<h1>R.H.V.Leonidas H13 - Goals Tracker 25/26</h1>
 
-  <div class="chart-container">
-    <canvas id="totalGoalsChart"></canvas>
-  </div>
+<div class="chart-container">
+  <canvas id="totalGoalsChart"></canvas>
+</div>
 
-  <div id="results"></div>
+<div id="results"></div>
 
-  <script>
-    // --- Firebase Config ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyCjNY4jonCkxLhdS9MQCg382l2y6pmPOc4",
-      authDomain: "leonidasgoalstracker.firebaseapp.com",
-      databaseURL: "https://leonidasgoalstracker-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "leonidasgoalstracker",
-      storageBucket: "leonidasgoalstracker.appspot.com",
-      messagingSenderId: "351370021203",
-      appId: "1:351370021203:web:8d0ca697abc1646d4079a6",
-      measurementId: "G-59JJEDNL8E"
-    };
+<script>
+  // --- Firebase config ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyCjNY4jonCkxLhdS9MQCg382l2y6pmPOc4",
+    authDomain: "leonidasgoalstracker.firebaseapp.com",
+    databaseURL: "https://leonidasgoalstracker-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "leonidasgoalstracker",
+    storageBucket: "leonidasgoalstracker.appspot.com",
+    messagingSenderId: "351370021203",
+    appId: "1:351370021203:web:8d0ca697abc1646d4079a6",
+    measurementId: "G-59JJEDNL8E"
+  };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const resultsDiv = document.getElementById("results");
+  let chart;
 
-    const resultsDiv = document.getElementById("results");
-    let chart;
+  const goalsRef = db.ref('goals');
 
-    const goalsRef = db.ref('goals');
-
-    // --- Ensure Weeks 1–10 exist ---
-    goalsRef.once('value').then(snapshot => {
-      let data = snapshot.val() || {};
-      for (let i=1; i<=10; i++) {
-        if (!data[`Week${i}`]) data[`Week${i}`] = {};
-      }
-      goalsRef.set(data, () => {
-        goalsRef.on('value', snap => {
-          const data = snap.val();
-          if (data) renderAll(data);
-        });
+  // Ensure Weeks 1–10 exist, then listen
+  goalsRef.once('value').then(snapshot => {
+    let data = snapshot.val() || {};
+    for (let i=1; i<=10; i++) {
+      if (!data[`Week${i}`]) data[`Week${i}`] = {};
+    }
+    goalsRef.set(data, () => {
+      goalsRef.on('value', snap => {
+        const data = snap.val();
+        if (data) renderAll(data);
       });
     });
+  });
 
-    function renderAll(data){
-      renderTables(data);
-      renderChart(data);
-    }
+  function renderAll(data){
+    renderTables(data);
+    renderChart(data);
+  }
 
-    function renderTables(data){
-      resultsDiv.innerHTML = '';
+  function renderTables(data){
+    resultsDiv.innerHTML = '';
+    for(let i=1;i<=10;i++){
+      const week = `Week${i}`;
+      const weekData = data[week] || {};
+      const opponentName = weekData["_opponent"] || "";
 
-      for(let i=1;i<=10;i++){
-        const week = `Week${i}`;
-        const weekData = data[week] || {};
-        const opponentName = weekData["_opponent"] || "";
-
-        let tableHTML = `<div class="week-header">Week ${i}</div>`;
-
-        // Table with opponent input in header
-        tableHTML += `<table>
+      let tableHTML = `
+        <div class="week-header">Week ${i}</div>
+        <div class="opponent-bar">
+          <input type="text" id="${week}-opponent" placeholder="Opponent" value="${opponentName}">
+          <button class="btn-opponent" onclick="saveOpponent('${week}')">Save Opponent</button>
+        </div>
+        <table>
           <tr>
             <th>Player</th>
             <th>Goals</th>
             <th>Actions</th>
-            <th>
-              Opponent<br>
-              <input type="text" id="${week}-opponent" placeholder="Opponent" value="${opponentName}" style="margin-top:5px;width:90%">
-              <button onclick="saveOpponent('${week}')" style="margin-top:5px;font-size:0.9em;padding:4px 8px;">Save</button>
-            </th>
           </tr>`;
 
-        for(const player in weekData){
-          if(player === "_opponent") continue; // skip special field
-          tableHTML += `<tr>
+      for(const player in weekData){
+        if(player === "_opponent") continue;
+        tableHTML += `
+          <tr>
             <td style="font-size:1.2em;font-weight:bold">${player}</td>
             <td>${weekData[player]}</td>
             <td>
@@ -117,111 +109,82 @@
               <button class="btn-minus" onclick="decrementGoal('${week}','${player}')">-1</button>
               <button class="btn-remove" onclick="removeGoal('${week}','${player}')">X</button>
             </td>
-            <td></td>
           </tr>`;
-        }
+      }
 
-        // Add player row
-        tableHTML += `<tr>
+      tableHTML += `
+        <tr>
           <td><input type="text" id="${week}-newPlayer" placeholder="Player name"></td>
           <td><input type="number" id="${week}-newGoals" placeholder="Goals" min="1"></td>
           <td><button class="btn-add" onclick="addPlayer('${week}')">Add Player</button></td>
-          <td></td>
-        </tr>`;
+        </tr>
+      </table>`;
 
-        tableHTML += '</table>';
-        resultsDiv.innerHTML += tableHTML;
+      resultsDiv.innerHTML += tableHTML;
+    }
+  }
+
+  function renderChart(data){
+    const totals = {};
+    for(const week in data){
+      for(const player in data[week]){
+        if(player === "_opponent") continue;
+        totals[player] = (totals[player]||0)+data[week][player];
       }
     }
+    const sortedTotals = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+    const labels = sortedTotals.map(e=>e[0]);
+    const values = sortedTotals.map(e=>e[1]);
 
-    function renderChart(data){
-      const totals = {};
-      for(const week in data){
-        for(const player in data[week]){
-          if(player === "_opponent") continue;
-          totals[player] = (totals[player]||0)+data[week][player];
+    const colors = labels.map((_,i)=>`hsl(${i*40},70%,50%)`);
+
+    const ctx = document.getElementById('totalGoalsChart').getContext('2d');
+    if(chart) chart.destroy();
+    chart = new Chart(ctx,{
+      type:'bar',
+      data:{
+        labels,
+        datasets:[{label:'Total Goals', data:values, backgroundColor:colors, borderRadius:6}]
+      },
+      options:{
+        indexAxis:'y',
+        responsive:true,
+        plugins:{legend:{display:false}},
+        scales:{
+          x:{beginAtZero:true, ticks:{precision:0, color:'#fff'}, grid:{color:'#333'}},
+          y:{ticks:{font:{size:18, weight:'bold'}, color:'#fff'}, grid:{color:'#222'}}
         }
       }
-      const sortedTotals = Object.entries(totals).sort((a,b)=>b[1]-a[1]);
-      const labels = sortedTotals.map(e=>e[0]);
-      const values = sortedTotals.map(e=>e[1]);
+    });
+  }
 
-      // Generate random colors
-      const colors = labels.map(() =>
-        `hsl(${Math.floor(Math.random()*360)},70%,50%)`
-      );
+  function addPlayer(week){
+    const player = document.getElementById(`${week}-newPlayer`).value.trim();
+    const goals = parseInt(document.getElementById(`${week}-newGoals`).value);
+    if(!player || isNaN(goals) || goals<1) return alert('Enter valid player and goals');
+    db.ref(`goals/${week}/${player}`).set(goals);
+  }
 
-      const chartCanvas = document.getElementById('totalGoalsChart');
-      const dynamicHeight = Math.max(labels.length * 40, 200);
-      chartCanvas.style.height = dynamicHeight + 'px';
+  function incrementGoal(week,player){
+    const ref = db.ref(`goals/${week}/${player}`);
+    ref.transaction(curr => (curr||0)+1);
+  }
 
-      const ctx = chartCanvas.getContext('2d');
-      if(chart) chart.destroy();
-      chart = new Chart(ctx,{
-        type:'bar',
-        data:{
-          labels,
-          datasets:[{
-            label:'Total Goals',
-            data:values,
-            backgroundColor: colors,
-            borderRadius:10
-          }]
-        },
-        options:{
-          indexAxis:'y',
-          responsive:true,
-          maintainAspectRatio:false,
-          plugins:{ legend:{ display:false }},
-          scales:{
-            x:{ beginAtZero:true, ticks:{ precision:0 }, grid:{ color:'#333' }},
-            y:{ grid:{ color:'#222' }, ticks:{ font:{ size:20, weight:'bold' }} }
-          }
-        }
-      });
+  function decrementGoal(week,player){
+    const ref = db.ref(`goals/${week}/${player}`);
+    ref.transaction(curr => (curr>0?curr-1:0));
+  }
+
+  function removeGoal(week,player){
+    if(confirm(`Remove ${player} from ${week}?`)){
+      db.ref(`goals/${week}/${player}`).remove();
     }
+  }
 
-    // --- Save Opponent ---
-    function saveOpponent(week){
-      const opponentField = document.getElementById(`${week}-opponent`);
-      const opponent = opponentField.value.trim();
-      db.ref(`goals/${week}/_opponent`).set(opponent || null);
-    }
-
-    // --- Add Player ---
-    function addPlayer(week){
-      const nameField = document.getElementById(`${week}-newPlayer`);
-      const goalsField = document.getElementById(`${week}-newGoals`);
-      const player = nameField.value.trim();
-      const goals = parseInt(goalsField.value);
-
-      if(!player || !goals || goals < 1) return alert("Enter valid player and goals");
-
-      const playerRef = db.ref(`goals/${week}/${player}`);
-      playerRef.transaction(currentValue => (currentValue || 0) + goals);
-
-      nameField.value = '';
-      goalsField.value = '';
-    }
-
-    function incrementGoal(week, player){
-      const playerRef = db.ref(`goals/${week}/${player}`);
-      playerRef.transaction(currentValue => (currentValue || 0) + 1);
-    }
-
-    function decrementGoal(week, player){
-      const playerRef = db.ref(`goals/${week}/${player}`);
-      playerRef.transaction(currentValue => {
-        if (!currentValue) return 0;
-        return Math.max(currentValue - 1, 0);
-      });
-    }
-
-    function removeGoal(week,player){
-      if(confirm(`Remove ${player}'s goals for ${week}?`)){
-        db.ref(`goals/${week}/${player}`).remove();
-      }
-    }
-  </script>
+  function saveOpponent(week){
+    const val = document.getElementById(`${week}-opponent`).value.trim();
+    db.ref(`goals/${week}/_opponent`).set(val);
+  }
+</script>
 </body>
 </html>
