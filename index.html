@@ -7,90 +7,22 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: white;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-    }
-    .chart-container {
-      width: 80%;
-      max-width: 900px;
-      height: 400px; /* fixed height */
-      margin: 20px auto;
-      background: #1e1e1e;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    }
-    .week-section {
-      margin: 30px auto;
-      max-width: 900px;
-    }
-    .week-title {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 10px;
-      background: #007bff;
-      color: white;
-      display: inline-block;
-      padding: 8px 16px;
-      border-radius: 20px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #1e1e1e;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-    }
-    th, td {
-      padding: 12px;
-      text-align: center;
-    }
-    th {
-      background: #007bff;
-      font-size: 16px;
-    }
-    td {
-      border-bottom: 1px solid #333;
-    }
-    .btn {
-      padding: 12px 18px;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      font-size: 16px;
-      margin: 3px;
-      cursor: pointer;
-    }
-    .btn-add { background: #28a745; }
-    .btn-sub { background: #ff9800; }
-    .btn-remove { background: #dc3545; }
-    .btn-player { background: #007bff; width: 140px; }
-    input {
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      margin-right: 10px;
-      background: #333;
-      color: white;
-    }
-    .opponent-input {
-      width: 100%;
-      text-align: center;
-      background: #333;
-      color: white;
-      padding: 8px;
-      border-radius: 6px;
-      border: none;
-    }
+    body { font-family: Arial, sans-serif; background: #121212; color: #fff; margin: 0; padding: 20px; }
+    h1 { text-align: center; }
+    .chart-container { width: 80%; max-width: 900px; height: 400px; margin: 20px auto; background:#1e1e1e; padding:20px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.5);}
+    .week-section { margin: 30px auto; max-width: 900px; }
+    .week-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; background:#007bff; color:#fff; display:inline-block; padding:8px 16px; border-radius:20px; }
+    table { width:100%; border-collapse:collapse; background:#1e1e1e; border-radius:12px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.6);}
+    th, td { padding:12px; text-align:center; }
+    th { background:#007bff; font-size:16px; }
+    td { border-bottom:1px solid #333; }
+    .btn { padding:12px 18px; border:none; border-radius:6px; color:#fff; font-size:16px; margin:3px; cursor:pointer; }
+    .btn-add { background:#28a745; }
+    .btn-sub { background:#ff9800; }
+    .btn-remove { background:#dc3545; }
+    .btn-player { background:#007bff; width:140px; }
+    input { padding:10px; border-radius:6px; border:none; background:#333; color:white; }
+    .opponent-input { width:90%; text-align:center; margin: 5px auto; display:block; }
   </style>
 </head>
 <body>
@@ -103,7 +35,7 @@
   <div id="weeks-container"></div>
   
   <script>
-    // Firebase v8
+    // Firebase v8 config
     var firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -129,32 +61,15 @@
           }
         });
       });
-
       const labels = Object.keys(playerGoals);
       const values = Object.values(playerGoals);
-
-      if (chart) chart.destroy();
+      if(chart) chart.destroy();
       chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Total Goals',
-            data: values,
-            backgroundColor: ['#ff4c4c','#ff9800','#ffc107','#4caf50','#2196f3','#9c27b0'],
-            borderRadius: 5,
-            barThickness: 40
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { ticks: { color: 'white', font: { size: 16 } } },
-            y: { ticks: { color: 'white', font: { size: 14 } }, beginAtZero: true }
-          },
-          plugins: { legend: { labels: { color: 'white' } } }
-        }
+        type:'bar',
+        data:{labels:labels, datasets:[{label:'Total Goals', data:values, backgroundColor:['#ff4c4c','#ff9800','#ffc107','#4caf50','#2196f3','#9c27b0'], borderRadius:5, barThickness:40}]},
+        options:{responsive:true, maintainAspectRatio:false,
+          scales:{x:{ticks:{color:'white',font:{size:16}}}, y:{ticks:{color:'white',font:{size:14}}, beginAtZero:true}},
+          plugins:{legend:{labels:{color:'white'}}}}
       });
     }
 
@@ -167,35 +82,33 @@
 
         const section = document.createElement("div");
         section.className = "week-section";
+        let rows = "";
+        Object.entries(weekData).forEach(([player, goals]) => {
+          if (player === "_opponent") return;
+          rows += `
+            <tr>
+              <td><b>${player}</b></td>
+              <td>${goals}</td>
+              <td>
+                <button class="btn btn-add" onclick="updateGoal('${weekKey}','${player}',1)">+1</button>
+                <button class="btn btn-sub" onclick="updateGoal('${weekKey}','${player}',-1)">-1</button>
+                <button class="btn btn-remove" onclick="removePlayer('${weekKey}','${player}')">X</button>
+              </td>
+            </tr>`;
+        });
+
         section.innerHTML = `
           <div class="week-title">Week ${i}</div>
           <table>
-            <thead>
+            <thead><tr><th>Player</th><th>Goals</th><th>Actions</th><th>Opponent</th></tr></thead>
+            <tbody>
+              ${rows}
               <tr>
-                <th>Player</th>
-                <th>Goals</th>
-                <th>Actions</th>
-                <th>Opponent</th>
+                <td colspan="3"><input id="newPlayer-${weekKey}" type="text" placeholder="Player name"></td>
+                <td><input class="opponent-input" type="text" value="${opponent}" onchange="saveOpponent('${weekKey}', this.value)"></td>
               </tr>
-            </thead>
-            <tbody id="tbody-${weekKey}">
-              ${Object.entries(weekData).filter(([p]) => p !== "_opponent").map(([player, goals]) => `
-                <tr>
-                  <td><b>${player}</b></td>
-                  <td>${goals}</td>
-                  <td>
-                    <button class="btn btn-add" onclick="updateGoal('${weekKey}','${player}',1)">+1</button>
-                    <button class="btn btn-sub" onclick="updateGoal('${weekKey}','${player}',-1)">-1</button>
-                    <button class="btn btn-remove" onclick="removePlayer('${weekKey}','${player}')">X</button>
-                  </td>
-                  ${Object.keys(weekData).filter(p => p !== "_opponent")[0] === player ? `<td rowspan="${Object.keys(weekData).length}" style="vertical-align: middle;">
-                    <input class="opponent-input" type="text" value="${opponent}" onchange="saveOpponent('${weekKey}', this.value)">
-                  </td>` : ""}
-                </tr>
-              `).join("")}
               <tr>
-                <td colspan="2"><input id="newPlayer-${weekKey}" type="text" placeholder="Player name"></td>
-                <td colspan="2"><button class="btn btn-player" onclick="addPlayer('${weekKey}')">Add Player</button></td>
+                <td colspan="4"><button class="btn btn-player" onclick="addPlayer('${weekKey}')">Add Player</button></td>
               </tr>
             </tbody>
           </table>
@@ -205,23 +118,15 @@
     }
 
     function updateGoal(week, player, delta) {
-      const ref = db.ref('goals/' + week + '/' + player);
-      ref.transaction(current => Math.max((current || 0) + delta, 0));
+      db.ref('goals/' + week + '/' + player).transaction(current => Math.max((current||0) + delta,0));
     }
-    function removePlayer(week, player) {
-      db.ref('goals/' + week + '/' + player).remove();
-    }
+    function removePlayer(week, player) { db.ref('goals/' + week + '/' + player).remove(); }
     function addPlayer(week) {
       const input = document.getElementById("newPlayer-" + week);
       const name = input.value.trim();
-      if (name) {
-        db.ref('goals/' + week + '/' + name).set(0);
-        input.value = "";
-      }
+      if(name) { db.ref('goals/' + week + '/' + name).set(0); input.value=""; }
     }
-    function saveOpponent(week, name) {
-      db.ref('goals/' + week + '/_opponent').set(name);
-    }
+    function saveOpponent(week, name) { db.ref('goals/' + week + '/_opponent').set(name); }
 
     db.ref("goals").on("value", snap => {
       const data = snap.val() || {};
