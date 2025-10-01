@@ -12,62 +12,75 @@
     }
     h1 {
       text-align: center;
+      margin-bottom: 40px;
+    }
+    .chart-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      margin-bottom: 50px;
+    }
+    canvas {
+      max-width: 800px;
+      width: 90%;
+      background: #fff;
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
     .week-header {
       margin-top: 30px;
       font-size: 1.2em;
       font-weight: bold;
+      text-align: center;
     }
     table {
       width: 100%;
       margin-top: 10px;
       border-collapse: collapse;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      padding: 10px;
       text-align: center;
     }
     th {
       background: #007bff;
       color: #fff;
     }
-    canvas {
-      margin: 30px 0;
-      max-width: 700px;
-      background: #fff;
-      padding: 10px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
   </style>
 </head>
 <body>
   <h1>R.H.V. Leonidas H13</h1>
 
+  <div class="chart-container">
+    <canvas id="weeklyChart"></canvas>
+    <canvas id="seasonChart"></canvas>
+  </div>
+
   <div id="results"></div>
 
-  <h2 style="margin-top:40px;">📊 Weekly Goals Graph</h2>
-  <canvas id="weeklyChart"></canvas>
-
-  <h2 style="margin-top:40px;">🏆 Season Totals</h2>
-  <canvas id="seasonChart"></canvas>
-
   <script>
-    // ========= EDIT THIS DATA =========
-    // Example structure: data[week][player] = goals
     const data = {
       "Week 1": { "Alice": 2, "Bob": 1, "Charlie": 1 },
       "Week 2": { "Alice": 1, "David": 3 },
       "Week 3": { "Charlie": 2, "Bob": 2, "Eve": 1 },
       "Week 4": { "Alice": 2, "Charlie": 1 }
     };
-    // ==================================
 
     const resultsDiv = document.getElementById("results");
 
-    // Render tables for each week
+    // Render tables
     function renderTables() {
+      resultsDiv.innerHTML = "";
       for (const week in data) {
         const weekData = data[week];
         let tableHTML = `
@@ -91,33 +104,44 @@
       }
     }
 
-    // Prepare Weekly Chart (total goals per week)
+    // Weekly chart with gradient bars
     function renderWeeklyChart() {
+      const ctx = document.getElementById("weeklyChart").getContext("2d");
       const weeks = Object.keys(data);
       const totals = weeks.map(week =>
-        Object.values(data[week]).reduce((a, b) => a + b, 0)
+        Object.values(data[week]).reduce((a,b) => a + b, 0)
       );
 
-      new Chart(document.getElementById("weeklyChart"), {
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, "rgba(54, 162, 235, 0.9)");
+      gradient.addColorStop(1, "rgba(54, 162, 235, 0.5)");
+
+      new Chart(ctx, {
         type: "bar",
         data: {
           labels: weeks,
           datasets: [{
             label: "Goals per Week",
             data: totals,
-            backgroundColor: "rgba(54, 162, 235, 0.7)"
+            backgroundColor: gradient,
+            borderRadius: 10,
+            hoverBackgroundColor: "rgba(54, 162, 235, 1)"
           }]
         },
         options: {
           responsive: true,
           plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true } }
+          scales: {
+            y: { beginAtZero: true, grid: { color: "#e0e0e0" } },
+            x: { grid: { color: "#f0f0f0" } }
+          }
         }
       });
     }
 
-    // Prepare Season Totals Chart (per player)
+    // Season totals chart with gradient
     function renderSeasonChart() {
+      const ctx = document.getElementById("seasonChart").getContext("2d");
       const totals = {};
       for (const week in data) {
         for (const player in data[week]) {
@@ -126,25 +150,33 @@
         }
       }
 
-      new Chart(document.getElementById("seasonChart"), {
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, "rgba(255, 99, 132, 0.9)");
+      gradient.addColorStop(1, "rgba(255, 99, 132, 0.5)");
+
+      new Chart(ctx, {
         type: "bar",
         data: {
           labels: Object.keys(totals),
           datasets: [{
             label: "Total Goals",
             data: Object.values(totals),
-            backgroundColor: "rgba(255, 99, 132, 0.7)"
+            backgroundColor: gradient,
+            borderRadius: 10,
+            hoverBackgroundColor: "rgba(255, 99, 132, 1)"
           }]
         },
         options: {
           responsive: true,
           plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true } }
+          scales: {
+            y: { beginAtZero: true, grid: { color: "#e0e0e0" } },
+            x: { grid: { color: "#f0f0f0" } }
+          }
         }
       });
     }
 
-    // Render everything
     renderTables();
     renderWeeklyChart();
     renderSeasonChart();
