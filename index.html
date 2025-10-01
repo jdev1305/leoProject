@@ -8,8 +8,8 @@
 body {
   font-family: Arial, sans-serif;
   margin: 20px;
-  background: #121212; /* dark background */
-  color: #e0e0e0; /* light text */
+  background: #121212;
+  color: #e0e0e0;
 }
 h1 {
   text-align: center;
@@ -23,7 +23,8 @@ h1 {
 canvas {
   max-width: 800px;
   width: 90%;
-  background: #1e1e1e; /* dark chart background */
+  height: auto;
+  background: #1e1e1e;
   padding: 15px;
   border-radius: 15px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.5);
@@ -37,11 +38,9 @@ canvas {
 }
 table {
   width: 100%;
-  margin-top: 10px;
-  border-collapse: collapse;
   max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 10px auto;
+  border-collapse: collapse;
   background: #1e1e1e;
   border-radius: 10px;
   overflow: hidden;
@@ -64,6 +63,11 @@ table tr:hover { background: #333; }
 @media(max-width: 600px){
   canvas { width: 100%; }
   table { display:block; overflow-x:auto; }
+}
+
+/* Optional taller chart on very large screens */
+@media(min-width: 1200px){
+  canvas { height: 400px; }
 }
 </style>
 </head>
@@ -171,10 +175,7 @@ function renderTotalGoalsChart() {
         y: {
           grid: { color: "#333" },
           ticks: { 
-            font: { 
-              weight: 'bold',
-              size: 18,
-            },
+            font: { weight: 'bold', size: 18 },
             color: '#ffffff'
           }
         }
