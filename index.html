@@ -144,6 +144,9 @@ function renderTotalGoalsChart() {
       plugins: {
         legend: { display: false },
         tooltip: {
+          bodyFont: { size: 16 },       // larger tooltip text
+          titleFont: { size: 16, weight: 'bold' },
+          padding: 12,                  // extra padding
           callbacks: {
             label: function(context) {
               return `${context.label}: ${context.parsed.x} goal${context.parsed.x !== 1 ? 's' : ''}`;
@@ -165,7 +168,12 @@ function renderTotalGoalsChart() {
         },
         y: {
           grid: { color: "#f0f0f0" },
-          ticks: { font: { weight: 'bold' } } // bold player names
+          ticks: { 
+            font: { 
+              weight: 'bold',
+              size: 18 // larger player names
+            } 
+          }
         }
       }
     }
