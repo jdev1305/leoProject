@@ -7,7 +7,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-  body { font-family: Arial; background: #121212; color: #f0f0f0; margin: 20px; }
+  body { font-family: Arial, sans-serif; background: #121212; color: #f0f0f0; margin: 20px; }
   h1 { text-align: center; margin-bottom: 20px; }
 
   .chart-container { display: flex; justify-content: center; margin-bottom: 30px; }
@@ -26,7 +26,14 @@
   th, td { border-bottom: 1px solid #333; padding: 10px; text-align: center; }
   th { background: #007bff; color: #fff; font-size: 1.1em; }
   
-  td button { border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 1em; }
+  td button { 
+    border: none; 
+    padding: 10px 16px;  /* bigger buttons */
+    border-radius: 6px; 
+    cursor: pointer; 
+    font-size: 1.05em; 
+    font-weight: bold;
+  }
   .btn-add { background: #28a745; color: #fff; }
   .btn-add:hover { background: #218838; }
   .btn-remove { background: #dc3545; color: #fff; }
@@ -35,8 +42,8 @@
   .btn-minus:hover { background: #e68900; }
 
   .form-container { max-width: 900px; margin: 10px auto; display: flex; justify-content: center; gap: 10px; }
-  .form-container input { padding: 8px 12px; border-radius: 6px; border: none; font-size: 1em; flex: 1; }
-  .form-container button { padding: 8px 14px; border-radius: 6px; border: none; background: #007bff; color: #fff; cursor: pointer; font-size: 1em; }
+  .form-container input { padding: 10px 14px; border-radius: 6px; border: none; font-size: 1em; flex: 1; }
+  .form-container button { padding: 10px 16px; border-radius: 6px; border: none; background: #007bff; color: #fff; cursor: pointer; font-size: 1.05em; font-weight: bold; }
   .form-container button:hover { background: #0056b3; }
 </style>
 </head>
@@ -69,26 +76,21 @@
 
   const goalsRef = db.ref('goals');
 
-  // Ensure 10 weeks exist
-  goalsRef.once('value').then(snapshot => {
-    let data = snapshot.val() || {};
-    for (let i=1; i<=10; i++) {
-      if (!data[`Week${i}`]) data[`Week${i}`] = {};
-    }
-    goalsRef.set(data, () => {
-      goalsRef.on('value', snap => {
-        const data = snap.val();
-        if (data) renderAll(data);
-      });
-    });
+  // Listen for data
+  goalsRef.on('value', snap => {
+    const data = snap.val() || {};
+    renderAll(data);
   });
 
   function renderAll(data){
     resultsDiv.innerHTML = '';
-    Object.keys(data).sort((a,b)=>parseInt(a.replace('Week',''))-parseInt(b.replace('Week','')))
-      .forEach(week=>{
-        renderWeekTable(week, data[week]);
-      });
+
+    // Always loop 1–10, even if missing in DB
+    for (let i=1; i<=10; i++) {
+      const weekKey = `Week${i}`;
+      renderWeekTable(weekKey, data[weekKey] || {});
+    }
+
     renderChart(data);
   }
 
@@ -105,7 +107,7 @@
     `;
 
     // Opponent row
-    const opponent = weekData && weekData._opponent ? weekData._opponent : "";
+    const opponent = weekData._opponent || "";
     tableHTML += `
       <tr>
         <td colspan="3"></td>
