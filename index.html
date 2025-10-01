@@ -22,16 +22,18 @@
       max-width: 800px;
       margin: 20px auto;
       padding: 20px;
-      background: #222;
+      background: #333; /* lighter than before */
       border-radius: 14px;
+      border: 1px solid #555;
       box-shadow: 0 6px 16px rgba(0,0,0,0.8);
       height: 400px;
     }
     .week-container {
       max-width: 800px;
       margin: 20px auto;
-      background: #222;
+      background: #333; /* lighter than before */
       border-radius: 14px;
+      border: 1px solid #555;
       padding: 10px;
       box-shadow: 0 6px 16px rgba(0,0,0,0.8);
       text-align: left;
@@ -51,7 +53,7 @@
     }
     th, td {
       padding: 10px;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid #444;
       vertical-align: middle;
     }
     th {
@@ -99,6 +101,7 @@
   <!-- Weeks will load here -->
   <div id="weeks"></div>
 
+  <!-- Firebase + Script remains unchanged -->
   <script>
     // ---- Firebase Config ----
     const firebaseConfig = {
@@ -142,8 +145,8 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } }, // remove "Total Goals"
-          indexAxis: "y", // horizontal bars
+          plugins: { legend: { display: false } }, 
+          indexAxis: "y", 
           scales: {
             x: { ticks: { color: "#fff", precision:0 } },
             y: { ticks: { color: "#fff" } }
