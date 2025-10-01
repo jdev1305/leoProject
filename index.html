@@ -242,18 +242,20 @@ document.getElementById('addGoalBtn').addEventListener('click', () => {
   document.getElementById('goalsInput').value = '';
 });
 
-// Remove goal handler
+// Remove goal handler with confirmation
 document.addEventListener('click', function(e){
   if(e.target.classList.contains('remove-btn')){
     const week = e.target.dataset.week;
     const player = e.target.dataset.player;
 
-    delete data[week][player];
-    if(Object.keys(data[week]).length === 0) delete data[week];
+    if(confirm(`Are you sure you want to remove all goals for ${player} in ${week}?`)){
+      delete data[week][player];
+      if(Object.keys(data[week]).length === 0) delete data[week];
 
-    localStorage.setItem('goalData', JSON.stringify(data));
-    renderTables();
-    renderTotalGoalsChart();
+      localStorage.setItem('goalData', JSON.stringify(data));
+      renderTables();
+      renderTotalGoalsChart();
+    }
   }
 });
 
