@@ -1,12 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Leonidas Goals Tracker</title>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+    :root{
+      /* One place to keep chart & table in perfect sync */
+      --card-width: 900px;
+      --card-padding: 20px;
+      --card-radius: 14px;
+    }
+
     body {
       background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
       color: #fff;
@@ -16,27 +23,29 @@
       text-align: center;
       min-height: 100vh;
     }
-    h1 {
-      margin: 20px 0;
-    }
-    .chart-container {
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 20px;
-      background: linear-gradient(145deg, #2b2b2b, #1e1e1e);
-      border-radius: 14px;
+    h1 { margin: 20px 0; }
+
+    /* ALIGNMENT FIX: same width, padding, radius, box-sizing */
+    .chart-container,
+    .week-container {
+      max-width: var(--card-width);
+      width: 100%;
+      margin: 24px auto;
+      padding: var(--card-padding);
+      border-radius: var(--card-radius);
+      box-sizing: border-box;
       box-shadow: 0 6px 16px rgba(0,0,0,0.8);
+    }
+
+    .chart-container {
+      background: linear-gradient(145deg, #2b2b2b, #1e1e1e);
       height: 400px;
     }
     .week-container {
-      max-width: 800px;
-      margin: 20px auto;
       background: linear-gradient(145deg, #2b2b2b, #1f1f1f);
-      border-radius: 14px;
-      padding: 10px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.8);
       text-align: left;
     }
+
     .week-title {
       background: linear-gradient(90deg, #2196f3, #00c6ff);
       display: inline-block;
@@ -45,36 +54,35 @@
       font-weight: bold;
       margin-bottom: 10px;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
-      border-radius: 14px;
+      border-radius: var(--card-radius);
       overflow: hidden;
     }
     thead tr {
       background: linear-gradient(90deg, #2196f3, #00c6ff);
-      border-radius: 14px;
+      border-radius: var(--card-radius);
     }
     thead th:first-child {
-      border-top-left-radius: 14px;
-      border-bottom-left-radius: 14px;
+      border-top-left-radius: var(--card-radius);
+      border-bottom-left-radius: var(--card-radius);
     }
     thead th:last-child {
-      border-top-right-radius: 14px;
-      border-bottom-right-radius: 14px;
+      border-top-right-radius: var(--card-radius);
+      border-bottom-right-radius: var(--card-radius);
     }
+
     th, td {
       padding: 10px;
       border-bottom: 1px solid #333;
       vertical-align: middle;
     }
-    th {
-      color: white;
-    }
-    th.opponent-header {
-      text-align: right;
-    }
+    th { color: white; }
+    th.opponent-header { text-align: right; }
+
     input {
       padding: 6px;
       margin: 4px;
@@ -83,6 +91,7 @@
       background: #2c2c2c;
       color: white;
     }
+
     button {
       padding: 14px 20px;
       margin: 4px;
@@ -94,23 +103,29 @@
       font-size: 16px;
     }
 
-    /* Buttons with gradient styling */
+    /* +1 stays green (gradient) */
     .btn-add {
       background: linear-gradient(135deg, #28a745, #1e7e34);
     }
+
+    /* -1: brighter amber to clearly differ from X */
     .btn-minus {
-      background: linear-gradient(135deg, #ff9800, #e68900);
-    }
-    .btn-remove {
-      background: linear-gradient(135deg, #dc3545, #a71d2a);
-    }
-    .btn-action {
-      background: linear-gradient(135deg, #9c27b0, #6a1b9a); /* Purple gradient */
+      background: linear-gradient(135deg, #ffc107, #ff9800);
+      border: 1px solid rgba(204, 122, 0, 0.6);
     }
 
-    .add-player-row td {
-      padding-top: 12px;
+    /* X: deeper crimson to contrast the amber */
+    .btn-remove {
+      background: linear-gradient(135deg, #ff3b30, #b00020);
+      border: 1px solid rgba(122, 10, 18, 0.6);
     }
+
+    /* Add Player (purple gradient) */
+    .btn-action {
+      background: linear-gradient(135deg, #9c27b0, #6a1b9a);
+    }
+
+    .add-player-row td { padding-top: 12px; }
   </style>
 </head>
 <body>
@@ -169,7 +184,7 @@
           plugins: { legend: { display: false } },
           indexAxis: "y",
           scales: {
-            x: { ticks: { color: "#fff", precision:0 } },
+            x: { ticks: { color: "#fff", precision: 0 } },
             y: { ticks: { color: "#fff" } }
           }
         }
@@ -189,8 +204,8 @@
                 <th>Goals</th>
                 <th>Actions</th>
                 <th class="opponent-header">
-                  Opponent: 
-                  <input type="text" value="${opponent}" 
+                  Opponent:
+                  <input type="text" value="${opponent}"
                     onchange="saveOpponent('${week}', this.value)">
                 </th>
               </tr>
@@ -226,15 +241,18 @@
       return html;
     }
 
+    // Update functions
     function updateGoals(week, player, delta) {
       const ref = db.ref("goals/" + week + "/" + player);
       ref.transaction(current => {
         return (current || 0) + delta > 0 ? (current || 0) + delta : 0;
       });
     }
+
     function removePlayer(week, player) {
       db.ref("goals/" + week + "/" + player).remove();
     }
+
     function addPlayer(week) {
       const input = document.getElementById("newPlayer-" + week);
       const name = input.value.trim();
@@ -243,9 +261,12 @@
         input.value = "";
       }
     }
+
     function saveOpponent(week, opponent) {
       db.ref("goals/" + week + "/_opponent").set(opponent);
     }
+
+    // Live sync
     db.ref("goals").on("value", snapshot => {
       const data = snapshot.val() || {};
       weeksContainer.innerHTML = "";
