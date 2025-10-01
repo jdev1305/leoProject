@@ -15,16 +15,24 @@
     body { font-family: Arial; background: #121212; color: #f0f0f0; margin: 20px; }
     h1 { text-align: center; margin-bottom: 20px; }
     .chart-container { display: flex; justify-content: center; margin-bottom: 30px; }
-    canvas { max-width: 650px; width: 90%; background: #1e1e1e; padding: 10px; border-radius: 15px; }
+    canvas { max-width: 750px; width: 95%; background: #1e1e1e; padding: 10px; border-radius: 15px; }
     .week-header { margin-top: 30px; font-size: 1.4em; font-weight: bold; text-align: center; }
     table { width: 100%; max-width: 750px; margin: 10px auto; border-collapse: collapse; background: #1e1e1e; border-radius: 8px; overflow: hidden; }
-    th, td { border-bottom: 1px solid #333; padding: 8px; text-align: center; }
-    th { background: #007bff; color: #fff; }
-    td button { background: #007bff; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin: 0 2px; }
-    td button:hover { background: #0056b3; }
-    .remove-btn { background: #ff4d4d; }
-    .remove-btn:hover { background: #ff1a1a; }
-    input { padding: 4px 6px; border-radius: 4px; border: none; }
+    th, td { border-bottom: 1px solid #333; padding: 10px; text-align: center; }
+    th { background: #007bff; color: #fff; font-size: 1.1em; }
+    td { font-size: 1.1em; }
+    input { padding: 6px 8px; border-radius: 4px; border: none; font-size: 1em; }
+
+    /* Buttons */
+    td button { border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; margin: 0 2px; font-size: 1em; font-weight: bold; color: #fff; }
+    .btn-add { background: #007bff; }
+    .btn-add:hover { background: #0056b3; }
+    .btn-plus { background: #28a745; }
+    .btn-plus:hover { background: #1e7e34; }
+    .btn-minus { background: #ff9800; }
+    .btn-minus:hover { background: #e68900; }
+    .btn-remove { background: #ff4d4d; }
+    .btn-remove:hover { background: #ff1a1a; }
   </style>
 </head>
 <body>
@@ -79,7 +87,7 @@
     function renderTables(data){
       resultsDiv.innerHTML = '';
 
-      // Always render 10 weeks, even if empty
+      // Always render 10 weeks
       for(let i=1;i<=10;i++){
         const week = `Week${i}`;
         const weekData = data[week] || {};
@@ -90,12 +98,12 @@
         
         for(const player in weekData){
           tableHTML += `<tr>
-            <td>${player}</td>
+            <td style="font-size:1.2em;font-weight:bold">${player}</td>
             <td>${weekData[player]}</td>
             <td>
-              <button onclick="incrementGoal('${week}','${player}')">+1</button>
-              <button onclick="decrementGoal('${week}','${player}')">-1</button>
-              <button class="remove-btn" onclick="removeGoal('${week}','${player}')">X</button>
+              <button class="btn-plus" onclick="incrementGoal('${week}','${player}')">+1</button>
+              <button class="btn-minus" onclick="decrementGoal('${week}','${player}')">-1</button>
+              <button class="btn-remove" onclick="removeGoal('${week}','${player}')">X</button>
             </td>
           </tr>`;
         }
@@ -104,7 +112,7 @@
         tableHTML += `<tr>
           <td><input type="text" id="${week}-newPlayer" placeholder="Player name"></td>
           <td><input type="number" id="${week}-newGoals" placeholder="Goals" min="1"></td>
-          <td><button onclick="addPlayer('${week}')">Add</button></td>
+          <td><button class="btn-add" onclick="addPlayer('${week}')">Add Player</button></td>
         </tr>`;
 
         tableHTML += '</table>';
@@ -123,9 +131,14 @@
       const labels = sortedTotals.map(e=>e[0]);
       const values = sortedTotals.map(e=>e[1]);
 
+      // Generate random colors for bars
+      const colors = labels.map(() =>
+        `hsl(${Math.floor(Math.random()*360)},70%,50%)`
+      );
+
       // Dynamically resize chart height
       const chartCanvas = document.getElementById('totalGoalsChart');
-      const dynamicHeight = Math.max(labels.length * 40, 200); // at least 200px
+      const dynamicHeight = Math.max(labels.length * 40, 200);
       chartCanvas.style.height = dynamicHeight + 'px';
 
       const ctx = chartCanvas.getContext('2d');
@@ -137,11 +150,8 @@
           datasets:[{
             label:'Total Goals',
             data:values,
-            backgroundColor:'#4BC0C0',
-            hoverBackgroundColor:'#ff9800',
-            borderRadius:10,
-            barThickness:25,
-            maxBarThickness:30
+            backgroundColor: colors,
+            borderRadius:10
           }]
         },
         options:{
@@ -151,13 +161,13 @@
           plugins:{ legend:{ display:false }},
           scales:{
             x:{ beginAtZero:true, ticks:{ precision:0 }, grid:{ color:'#333' }},
-            y:{ grid:{ color:'#222' }, ticks:{ font:{ size:14, weight:'bold' }}}
+            y:{ grid:{ color:'#222' }, ticks:{ font:{ size:16, weight:'bold' }}}
           }
         }
       });
     }
 
-    // --- Add Player inside table ---
+    // --- Add Player ---
     function addPlayer(week){
       const nameField = document.getElementById(`${week}-newPlayer`);
       const goalsField = document.getElementById(`${week}-newGoals`);
@@ -173,13 +183,13 @@
       goalsField.value = '';
     }
 
-    // --- Increment Goals ---
+    // --- Increment ---
     function incrementGoal(week, player){
       const playerRef = db.ref(`goals/${week}/${player}`);
       playerRef.transaction(currentValue => (currentValue || 0) + 1);
     }
 
-    // --- Decrement Goals ---
+    // --- Decrement ---
     function decrementGoal(week, player){
       const playerRef = db.ref(`goals/${week}/${player}`);
       playerRef.transaction(currentValue => {
@@ -188,7 +198,7 @@
       });
     }
 
-    // --- Remove Player ---
+    // --- Remove ---
     function removeGoal(week,player){
       if(confirm(`Remove ${player}'s goals for ${week}?`)){
         db.ref(`goals/${week}/${player}`).remove();
