@@ -19,7 +19,7 @@
       margin: 20px 0;
     }
     .chart-container {
-      max-width: 800px; /* same as tables */
+      max-width: 800px;
       margin: 20px auto;
       padding: 20px;
       background: #2a2a2a;
@@ -37,7 +37,7 @@
       text-align: left;
     }
     .week-title {
-      background: linear-gradient(135deg, #3a86ff, #00b4d8);
+      background: #2196f3; /* modern solid blue */
       display: inline-block;
       padding: 6px 14px;
       border-radius: 20px;
@@ -55,8 +55,14 @@
       vertical-align: middle;
     }
     th {
-      background: linear-gradient(135deg, #3a86ff, #00b4d8);
+      background: #2196f3;
       color: white;
+    }
+    thead tr:first-child th:first-child {
+      border-top-left-radius: 14px;
+    }
+    thead tr:first-child th:last-child {
+      border-top-right-radius: 14px;
     }
     th.opponent-header {
       text-align: right;
@@ -82,9 +88,7 @@
     .btn-add { background: #28a745; }
     .btn-remove { background: #dc3545; }
     .btn-minus { background: #ff9800; }
-    .btn-action { 
-      background: linear-gradient(135deg, #3a86ff, #00b4d8);
-    }
+    .btn-action { background: #2196f3; }
     .add-player-row td {
       padding-top: 12px;
     }
@@ -102,7 +106,6 @@
   <div id="weeks"></div>
 
   <script>
-    // ---- Firebase Config ----
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -117,7 +120,6 @@
 
     const weeksContainer = document.getElementById("weeks");
 
-    // Chart setup
     let chart;
     function renderChart(allData) {
       const totals = {};
@@ -127,8 +129,6 @@
           totals[player] = (totals[player] || 0) + allData[week][player];
         }
       }
-
-      // Sort players by goals
       const sorted = Object.entries(totals).sort((a,b) => b[1] - a[1]);
       const labels = sorted.map(([p]) => p);
       const data = sorted.map(([_,g]) => g);
@@ -145,7 +145,7 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
-          indexAxis: "y", // horizontal bars
+          indexAxis: "y",
           scales: {
             x: { ticks: { color: "#fff", precision:0 } },
             y: { ticks: { color: "#fff" } }
@@ -154,7 +154,6 @@
       });
     }
 
-    // Render week table
     function renderWeek(week, data) {
       const opponent = data._opponent || "";
       let html = `
@@ -204,18 +203,15 @@
       return html;
     }
 
-    // Update functions
     function updateGoals(week, player, delta) {
       const ref = db.ref("goals/" + week + "/" + player);
       ref.transaction(current => {
         return (current || 0) + delta > 0 ? (current || 0) + delta : 0;
       });
     }
-
     function removePlayer(week, player) {
       db.ref("goals/" + week + "/" + player).remove();
     }
-
     function addPlayer(week) {
       const input = document.getElementById("newPlayer-" + week);
       const name = input.value.trim();
@@ -224,12 +220,10 @@
         input.value = "";
       }
     }
-
     function saveOpponent(week, opponent) {
       db.ref("goals/" + week + "/_opponent").set(opponent);
     }
 
-    // Live sync
     db.ref("goals").on("value", snapshot => {
       const data = snapshot.val() || {};
       weeksContainer.innerHTML = "";
