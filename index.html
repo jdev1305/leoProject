@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>R.H.V. Leonidas H13</title>
+  <title>R.H.V. Leonidas H13 - Goals Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
@@ -16,9 +16,7 @@
     }
     .chart-container {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 40px;
+      justify-content: center;
       margin-bottom: 50px;
     }
     canvas {
@@ -50,55 +48,4 @@
     th, td {
       border-bottom: 1px solid #ddd;
       padding: 10px;
-      text-align: center;
-    }
-    th {
-      background: #007bff;
-      color: #fff;
-    }
-  </style>
-</head>
-<body>
-  <h1>R.H.V. Leonidas H13</h1>
-
-  <div class="chart-container">
-    <canvas id="weeklyChart"></canvas>
-    <canvas id="seasonChart"></canvas>
-    <canvas id="totalGoalsChart"></canvas>
-  </div>
-
-  <div id="results"></div>
-
-  <script>
-    const data = {
-      "Week 1": { "Alice": 2, "Bob": 1, "Charlie": 1 },
-      "Week 2": { "Alice": 1, "David": 3 },
-      "Week 3": { "Charlie": 2, "Bob": 2, "Eve": 1 },
-      "Week 4": { "Alice": 2, "Charlie": 1 }
-    };
-
-    const resultsDiv = document.getElementById("results");
-
-    // Render tables
-    function renderTables() {
-      resultsDiv.innerHTML = "";
-      for (const week in data) {
-        const weekData = data[week];
-        let tableHTML = `
-          <div class="week-header">${week}</div>
-          <table>
-            <tr>
-              <th>Player</th>
-              <th>Goals</th>
-            </tr>
-        `;
-        for (const player in weekData) {
-          tableHTML += `
-            <tr>
-              <td>${player}</td>
-              <td>${weekData[player]}</td>
-            </tr>
-          `;
-        }
-        tableHTML += "</table>";
-        resultsDiv.innerHT
+      text-align: c
