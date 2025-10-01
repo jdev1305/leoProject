@@ -108,7 +108,7 @@ function renderTables() {
     tableCard.className = 'table-card';
     let tableHTML = `<div class="week-header">${week}</div><table><tr><th>Player</th><th>Goals</th></tr>`;
     for (const player in weekData) {
-      tableHTML += `<tr><td>${player}</td><td>⚽ ${weekData[player]}</td></tr>`;
+      tableHTML += `<tr><td>${player}</td><td>${weekData[player]}</td></tr>`;
     }
     tableHTML += "</table>";
     tableCard.innerHTML = tableHTML;
@@ -147,7 +147,7 @@ function renderTotalGoalsChart() {
         backgroundColor: labels.map((_, i) => getColor(i)),
         borderRadius: 10,
         barThickness: 30,
-        hoverBackgroundColor: "#39FF14" // neon green hover
+        hoverBackgroundColor: "#00FFFF" // guaranteed contrast
       }]
     },
     options: {
