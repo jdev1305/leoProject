@@ -8,15 +8,12 @@
 body {
   font-family: Arial, sans-serif;
   margin: 20px;
-  background: #f8f9fa;
+  background: #121212; /* dark background */
+  color: #e0e0e0; /* light text */
 }
 h1 {
   text-align: center;
-  margin-bottom: 20px;
-}
-h2 {
-  text-align: center;
-  margin-bottom: 15px;
+  margin-bottom: 40px;
 }
 .chart-container {
   display: flex;
@@ -26,16 +23,17 @@ h2 {
 canvas {
   max-width: 800px;
   width: 90%;
-  background: #fff;
+  background: #1e1e1e; /* dark chart background */
   padding: 15px;
   border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 .week-header {
   margin-top: 30px;
   font-size: 1.2em;
   font-weight: bold;
   text-align: center;
+  color: #ffffff;
 }
 table {
   width: 100%;
@@ -44,22 +42,23 @@ table {
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
-  background: #fff;
+  background: #1e1e1e;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 th, td {
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #333;
   padding: 10px;
   text-align: center;
+  color: #e0e0e0;
 }
 th {
   background: #007bff;
   color: #fff;
 }
-table tr:nth-child(even) { background: #f2f2f2; }
-table tr:hover { background: #e0f7fa; }
+table tr:nth-child(even) { background: #2a2a2a; }
+table tr:hover { background: #333; }
 
 /* Responsive adjustments */
 @media(max-width: 600px){
@@ -71,7 +70,6 @@ table tr:hover { background: #e0f7fa; }
 <body>
 <h1>R.H.V.Leonidas H13 - Goals Tracker 25/26</h1>
 
-<h2>🏆 Total Goals per Player</h2>
 <div class="chart-container">
   <canvas id="totalGoalsChart"></canvas>
 </div>
@@ -144,9 +142,12 @@ function renderTotalGoalsChart() {
       plugins: {
         legend: { display: false },
         tooltip: {
-          bodyFont: { size: 16 },       // larger tooltip text
+          bodyFont: { size: 16 },
           titleFont: { size: 16, weight: 'bold' },
-          padding: 12,                  // extra padding
+          padding: 12,
+          backgroundColor: '#333',
+          titleColor: '#fff',
+          bodyColor: '#fff',
           callbacks: {
             label: function(context) {
               return `${context.label}: ${context.parsed.x} goal${context.parsed.x !== 1 ? 's' : ''}`;
@@ -159,20 +160,22 @@ function renderTotalGoalsChart() {
           beginAtZero: true,
           stepSize: 1,
           ticks: {
+            color: '#e0e0e0',
             callback: function(value) {
               return Number.isInteger(value) ? value : null;
             },
             precision: 0
           },
-          grid: { color: "#e0e0e0" }
+          grid: { color: "#333" }
         },
         y: {
-          grid: { color: "#f0f0f0" },
+          grid: { color: "#333" },
           ticks: { 
             font: { 
               weight: 'bold',
-              size: 18 // larger player names
-            } 
+              size: 18,
+            },
+            color: '#ffffff'
           }
         }
       }
