@@ -7,88 +7,20 @@
 <script src="https://www.gstatic.com/firebasejs/9.29.0/firebase-database-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #121212;
-    color: #f0f0f0;
-    margin: 20px;
-  }
-  h1 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  .chart-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 30px;
-  }
-  canvas {
-    max-width: 650px;
-    width: 90%;
-    background: #1e1e1e;
-    padding: 10px;
-    border-radius: 15px;
-  }
-  .week-header {
-    margin-top: 20px;
-    font-size: 1.2em;
-    font-weight: bold;
-    text-align: center;
-  }
-  table {
-    width: 100%;
-    max-width: 650px;
-    margin: 10px auto;
-    border-collapse: collapse;
-    background: #1e1e1e;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  th, td {
-    border-bottom: 1px solid #333;
-    padding: 8px;
-    text-align: center;
-  }
-  th {
-    background: #007bff;
-    color: #fff;
-  }
-  td button {
-    background: #ff4d4d;
-    color: #fff;
-    border: none;
-    padding: 2px 6px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  td button:hover {
-    background: #ff1a1a;
-  }
-  .form-container {
-    max-width: 650px;
-    margin: 20px auto;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .form-container input, .form-container select {
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: none;
-    font-size: 1em;
-  }
-  .form-container button {
-    padding: 6px 12px;
-    border-radius: 6px;
-    border: none;
-    background: #007bff;
-    color: #fff;
-    cursor: pointer;
-  }
-  .form-container button:hover {
-    background: #0056b3;
-  }
+  body { font-family: Arial; background: #121212; color: #f0f0f0; margin: 20px; }
+  h1 { text-align: center; margin-bottom: 20px; }
+  .chart-container { display: flex; justify-content: center; margin-bottom: 30px; }
+  canvas { max-width: 650px; width: 90%; background: #1e1e1e; padding: 10px; border-radius: 15px; }
+  .week-header { margin-top: 20px; font-size: 1.2em; font-weight: bold; text-align: center; }
+  table { width: 100%; max-width: 650px; margin: 10px auto; border-collapse: collapse; background: #1e1e1e; border-radius: 8px; overflow: hidden; }
+  th, td { border-bottom: 1px solid #333; padding: 8px; text-align: center; }
+  th { background: #007bff; color: #fff; }
+  td button { background: #ff4d4d; color: #fff; border: none; padding: 2px 6px; border-radius: 4px; cursor: pointer; }
+  td button:hover { background: #ff1a1a; }
+  .form-container { max-width: 650px; margin: 20px auto; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .form-container input, .form-container select { padding: 6px 10px; border-radius: 6px; border: none; font-size: 1em; }
+  .form-container button { padding: 6px 12px; border-radius: 6px; border: none; background: #007bff; color: #fff; cursor: pointer; }
+  .form-container button:hover { background: #0056b3; }
 </style>
 </head>
 <body>
@@ -122,7 +54,6 @@
 
   const app = firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
-
   const resultsDiv = document.getElementById("results");
   const weekSelect = document.getElementById("weekSelect");
   const playerInput = document.getElementById("playerInput");
@@ -132,16 +63,21 @@
 
   const goalsRef = db.ref('goals');
 
-  // --- Initialize Weeks 1-10 if missing ---
+  // --- Ensure Weeks 1–10 exist, then start listening ---
   goalsRef.once('value').then(snapshot => {
     let data = snapshot.val() || {};
-    for(let i=1;i<=10;i++){
-      if(!data[`Week ${i}`]) data[`Week ${i}`] = {};
+    for (let i=1; i<=10; i++) {
+      if (!data[`Week ${i}`]) data[`Week ${i}`] = {};
     }
-    goalsRef.set(data);
+    goalsRef.set(data, () => {
+      // After initialization, start listening
+      goalsRef.on('value', snap => {
+        const data = snap.val();
+        if (data) renderAll(data);
+      });
+    });
   });
 
-  // --- Render functions ---
   function renderAll(data){
     renderDropdown();
     renderTables(data);
@@ -160,21 +96,20 @@
 
   function renderTables(data){
     resultsDiv.innerHTML = '';
-    Object.keys(data).sort((a,b)=>{
-      return parseInt(a.split(' ')[1])-parseInt(b.split(' ')[1]);
-    }).forEach(week=>{
-      const weekData = data[week];
-      let tableHTML = `<div class="week-header">${week}</div><table><tr><th>Player</th><th>Goals</th><th>Remove</th></tr>`;
-      for(const player in weekData){
-        tableHTML += `<tr>
-          <td>${player}</td>
-          <td>${weekData[player]}</td>
-          <td><button onclick="removeGoal('${week}','${player}')">X</button></td>
-        </tr>`;
-      }
-      tableHTML += '</table>';
-      resultsDiv.innerHTML += tableHTML;
-    });
+    Object.keys(data).sort((a,b)=>parseInt(a.split(' ')[1])-parseInt(b.split(' ')[1]))
+      .forEach(week=>{
+        const weekData = data[week];
+        let tableHTML = `<div class="week-header">${week}</div><table><tr><th>Player</th><th>Goals</th><th>Remove</th></tr>`;
+        for(const player in weekData){
+          tableHTML += `<tr>
+            <td>${player}</td>
+            <td>${weekData[player]}</td>
+            <td><button onclick="removeGoal('${week}','${player}')">X</button></td>
+          </tr>`;
+        }
+        tableHTML += '</table>';
+        resultsDiv.innerHTML += tableHTML;
+      });
   }
 
   function renderChart(data){
@@ -194,13 +129,7 @@
       type:'bar',
       data:{
         labels,
-        datasets:[{
-          label:'Total Goals',
-          data: values,
-          backgroundColor: '#4BC0C0',
-          hoverBackgroundColor: '#ff9800',
-          borderRadius: 10
-        }]
+        datasets:[{label:'Total Goals', data:values, backgroundColor:'#4BC0C0', hoverBackgroundColor:'#ff9800', borderRadius:10}]
       },
       options:{
         indexAxis:'y',
@@ -214,14 +143,12 @@
     });
   }
 
-  // --- Add / remove goals ---
   addGoalBtn.addEventListener('click',()=>{
     const week = weekSelect.value;
     const player = playerInput.value.trim();
     const goals = parseInt(goalsInput.value);
-    if(!player || !goals || goals < 1) return alert('Enter a valid player name and goals');
-    const playerRef = db.ref(`goals/${week}/${player}`);
-    playerRef.set(goals);
+    if(!player || !goals || goals < 1) return alert('Enter valid player and goals');
+    db.ref(`goals/${week}/${player}`).set(goals);
     playerInput.value=''; goalsInput.value='';
   });
 
@@ -230,12 +157,6 @@
       db.ref(`goals/${week}/${player}`).remove();
     }
   }
-
-  // --- Listen for changes ---
-  goalsRef.on('value', snapshot=>{
-    const data = snapshot.val();
-    if(data) renderAll(data);
-  });
 </script>
 </body>
 </html>
