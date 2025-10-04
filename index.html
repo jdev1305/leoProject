@@ -220,6 +220,7 @@
 
     function renderWeek(week, data) {
       const opponent = data._opponent || "";
+      const opponentClass = opponent ? "fw-bold" : "";
       let html = `
         <div class="week-container">
           <div class="week-title">${week.replace("Week", "Week ")}</div>
@@ -229,9 +230,9 @@
                 <th>Player</th>
                 <th>Goals</th>
                 <th class="text-end">
-                  Opponent:
-                  <input type="text" class="form-control d-inline-block w-auto" value="${opponent}"
-                    onchange="saveOpponent('${week}', this.value)">
+                  Opponent
+                  <input type="text" class="form-control d-inline-block w-auto ${opponentClass}" 
+                    value="${opponent}" onchange="saveOpponent('${week}', this.value)">
                 </th>
               </tr>
             </thead>
@@ -256,8 +257,10 @@
       html += `
             <tr class="add-player-row">
               <td colspan="3">
-                <input type="text" id="newPlayer-${week}" class="form-control d-inline-block w-auto" placeholder="Player name">
-                <button class="btn btn-action btn-sm" onclick="addPlayer('${week}')">Add Player</button>
+                <div class="d-flex align-items-center gap-2">
+                  <input type="text" id="newPlayer-${week}" class="form-control" placeholder="Player name">
+                  <button class="btn btn-action btn-sm" onclick="addPlayer('${week}')">Add Player</button>
+                </div>
               </td>
             </tr>
             </tbody>
