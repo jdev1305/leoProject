@@ -3,14 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <title>Leonidas Goals Tracker</title>
-  <!-- Bootstrap + Bootswatch Lux (light, modern, not too bright) -->
-  <link 
-    href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/lux/bootstrap.min.css" 
+
+  <!-- Bootswatch Lux (light theme default) -->
+  <link id="themeStylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/lux/bootstrap.min.css"
     rel="stylesheet"
   >
+
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     :root {
       --bs-border-radius: 8px; /* global rounding */
@@ -57,14 +60,22 @@
       vertical-align: middle;
     }
 
-    /* Buttons with consistent rounding */
-    .btn-add { background: linear-gradient(135deg, #28a745, #1e7e34); color: #fff; border-radius: 8px; }
-    .btn-minus { background: linear-gradient(135deg, #ffc107, #ff9800); color: #000; border-radius: 8px; }
-    .btn-remove { background: linear-gradient(135deg, #ff3b30, #b00020); color: #fff; border-radius: 8px; }
-    .btn-action { background: linear-gradient(135deg, #9c27b0, #6a1b9a); color: #fff; border-radius: 8px; }
+    /* Custom button colors */
+    .btn-add { background: linear-gradient(135deg, #28a745, #1e7e34); color: #fff; }
+    .btn-minus { background: linear-gradient(135deg, #ffc107, #ff9800); color: #000; }
+    .btn-remove { background: linear-gradient(135deg, #ff3b30, #b00020); color: #fff; }
+    .btn-action { background: linear-gradient(135deg, #9c27b0, #6a1b9a); color: #fff; }
 
-    /* Button group spacing */
-    .btn-group .btn {
+    /* 🔧 Fix button size consistency */
+    .btn {
+      font-size: 14px !important;
+      padding: 6px 12px !important;
+      line-height: 1.4 !important;
+      border-radius: 8px !important;
+    }
+    .btn-group.d-flex .btn {
+      flex: 1 1 auto;
+      min-width: 60px;
       margin: 2px;
     }
 
@@ -72,10 +83,20 @@
     .form-control {
       border-radius: 8px !important;
     }
+
+    /* Theme toggle button styling */
+    #themeToggle {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+    }
   </style>
 </head>
 <body class="bg-light text-dark">
-  <div class="container py-4">
+  <div class="container py-4 position-relative">
+    <!-- Theme Toggle -->
+    <button id="themeToggle" class="btn btn-secondary">🌙 Dark Mode</button>
+
     <h1 class="text-center mb-4">R.H.V.Leonidas H13 - Topscorers 25/26</h1>
 
     <!-- Chart -->
@@ -127,7 +148,7 @@
           datasets: [{
             data,
             backgroundColor: colors,
-            borderRadius: 8 // <-- rounded bars
+            borderRadius: 8 // rounded bars
           }]
         },
         options: {
@@ -226,6 +247,23 @@
         weeksContainer.innerHTML += renderWeek(week, data[week] || {});
       }
       renderChart(data);
+    });
+
+    // 🔧 Theme toggle
+    const themeToggle = document.getElementById("themeToggle");
+    const themeLink = document.getElementById("themeStylesheet");
+    let darkMode = false;
+
+    themeToggle.addEventListener("click", () => {
+      if (darkMode) {
+        themeLink.href = "https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/lux/bootstrap.min.css";
+        themeToggle.textContent = "🌙 Dark Mode";
+        darkMode = false;
+      } else {
+        themeLink.href = "https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/darkly/bootstrap.min.css";
+        themeToggle.textContent = "☀️ Light Mode";
+        darkMode = true;
+      }
     });
   </script>
 </body>
