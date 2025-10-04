@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Leonidas Goals Tracker</title>
-  <!-- Bootstrap + Bootswatch Lux theme -->
+  <!-- Bootstrap + Bootswatch Lux (light, modern, not too bright) -->
   <link 
     href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/lux/bootstrap.min.css" 
     rel="stylesheet"
@@ -12,34 +12,66 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    .chart-container {
+    :root {
+      --bs-border-radius: 8px; /* global rounding */
+    }
+
+    body {
       background: #f8f9fa;
+    }
+
+    /* Containers */
+    .chart-container {
+      background: #ffffff;
       padding: 20px;
-      border-radius: 12px;
+      border-radius: 8px;
       margin-bottom: 30px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
       height: 400px;
     }
     .week-container {
       background: #ffffff;
       padding: 20px;
-      border-radius: 12px;
+      border-radius: 8px;
       margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
+
+    /* Week label */
     .week-title {
       background: linear-gradient(90deg, #007bff, #00c6ff);
       display: inline-block;
       padding: 6px 14px;
-      border-radius: 20px;
-      font-weight: bold;
+      border-radius: 8px;
+      font-weight: 600;
       margin-bottom: 10px;
       color: #fff;
     }
-    .btn-add { background: linear-gradient(135deg, #28a745, #1e7e34); color: #fff; }
-    .btn-minus { background: linear-gradient(135deg, #ffc107, #ff9800); color: #000; }
-    .btn-remove { background: linear-gradient(135deg, #ff3b30, #b00020); color: #fff; }
-    .btn-action { background: linear-gradient(135deg, #9c27b0, #6a1b9a); color: #fff; }
+
+    /* Table tweaks */
+    table {
+      border-radius: 8px !important;
+      overflow: hidden;
+    }
+    table th, table td {
+      vertical-align: middle;
+    }
+
+    /* Buttons with consistent rounding */
+    .btn-add { background: linear-gradient(135deg, #28a745, #1e7e34); color: #fff; border-radius: 8px; }
+    .btn-minus { background: linear-gradient(135deg, #ffc107, #ff9800); color: #000; border-radius: 8px; }
+    .btn-remove { background: linear-gradient(135deg, #ff3b30, #b00020); color: #fff; border-radius: 8px; }
+    .btn-action { background: linear-gradient(135deg, #9c27b0, #6a1b9a); color: #fff; border-radius: 8px; }
+
+    /* Button group spacing */
+    .btn-group .btn {
+      margin: 2px;
+    }
+
+    /* Inputs */
+    .form-control {
+      border-radius: 8px !important;
+    }
   </style>
 </head>
 <body class="bg-light text-dark">
@@ -81,6 +113,7 @@
           totals[player] = (totals[player] || 0) + allData[week][player];
         }
       }
+
       const sorted = Object.entries(totals).sort((a,b) => b[1] - a[1]);
       const labels = sorted.map(([p]) => p);
       const data = sorted.map(([_,g]) => g);
@@ -91,7 +124,11 @@
         type: "bar",
         data: {
           labels,
-          datasets: [{ data, backgroundColor: colors }]
+          datasets: [{
+            data,
+            backgroundColor: colors,
+            borderRadius: 8 // <-- rounded bars
+          }]
         },
         options: {
           responsive: true,
@@ -134,9 +171,11 @@
             <td><b>${player}</b></td>
             <td>${data[player]}</td>
             <td>
-              <button class="btn btn-add btn-sm" onclick="updateGoals('${week}','${player}',1)">+1</button>
-              <button class="btn btn-minus btn-sm" onclick="updateGoals('${week}','${player}',-1)">-1</button>
-              <button class="btn btn-remove btn-sm" onclick="removePlayer('${week}','${player}')">X</button>
+              <div class="btn-group d-flex flex-wrap" role="group">
+                <button class="btn btn-add btn-sm flex-fill" onclick="updateGoals('${week}','${player}',1)">+1</button>
+                <button class="btn btn-minus btn-sm flex-fill" onclick="updateGoals('${week}','${player}',-1)">-1</button>
+                <button class="btn btn-remove btn-sm flex-fill" onclick="removePlayer('${week}','${player}')">X</button>
+              </div>
             </td>
             <td></td>
           </tr>
