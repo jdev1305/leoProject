@@ -51,30 +51,32 @@
     .week-container {
       background: var(--card-bg);
       color: var(--text);
-      padding: 20px;
+      padding: 0;
       border-radius: 8px;
       margin-bottom: 20px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      overflow: hidden;
     }
 
     .chart-container {
+      padding: 20px;
       height: 400px;
       margin-bottom: 30px;
     }
 
     .week-title {
       background: var(--accent);
-      display: inline-block;
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-weight: 600;
-      margin-bottom: 10px;
+      display: block;
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 8px 8px 0 0;
+      font-weight: 700;
+      margin-bottom: 0;
       color: #fff;
+      text-align: left;
     }
 
     table {
-      border-radius: 8px !important;
-      overflow: hidden;
       background: var(--table-bg) !important;
       color: var(--table-text) !important;
       width: 100%;
@@ -90,8 +92,8 @@
     }
 
     thead tr {
-      background: var(--accent) !important;
-      color: #fff !important;
+      background: var(--table-bg) !important;
+      color: var(--table-text) !important;
     }
 
     .btn {
@@ -116,7 +118,6 @@
       height: 38px;
     }
 
-    /* Dark Mode Toggle Button */
     #themeToggle {
       position: fixed;
       top: 15px;
@@ -127,7 +128,6 @@
       border-radius: 8px;
     }
 
-    /* Improve chart label readability on mobile */
     @media (max-width: 576px) {
       canvas {
         font-size: 14px !important;
@@ -149,7 +149,6 @@
   </div>
 
   <script>
-    // ---- Firebase Config ----
     const firebaseConfig = {
       apiKey: "AIzaSyCjNY4jonCkxLhdS9MQCg382l2y6pmPOc4",
       authDomain: "leonidasgoalstracker.firebaseapp.com",
