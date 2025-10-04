@@ -39,11 +39,11 @@
       background: var(--bg);
       color: var(--text);
       font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      font-weight: 500; /* make everything slightly thicker */
+      font-weight: 500;
     }
 
     h1 {
-      font-weight: 700; /* thicker for header */
+      font-weight: 700;
       color: var(--text);
     }
 
@@ -106,15 +106,14 @@
       margin: 2px;
     }
 
-    /* Buttons with distinct but cohesive colors */
     .btn-add { background: #198754; color: #fff; }
     .btn-minus { background: #fd7e14; color: #fff; }
     .btn-remove { background: #dc3545; color: #fff; }
-    .btn-action { background: #6f42c1; color: #fff; height: 38px; } /* match input height */
+    .btn-action { background: #6f42c1; color: #fff; height: 38px; }
 
     .form-control {
       border-radius: 8px !important;
-      height: 38px; /* ensure equal height with button */
+      height: 38px;
     }
 
     /* Dark Mode Toggle Button */
@@ -127,21 +126,25 @@
       padding: 10px 16px;
       border-radius: 8px;
     }
+
+    /* Improve chart label readability on mobile */
+    @media (max-width: 576px) {
+      canvas {
+        font-size: 14px !important;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container py-4">
-    <!-- Theme Toggle -->
     <button id="themeToggle" class="btn btn-secondary">🌙 Dark Mode</button>
 
     <h1 class="text-center mb-4">R.H.V.Leonidas H13 - Topscorers 25/26</h1>
 
-    <!-- Chart -->
     <div class="chart-container">
       <canvas id="goalsChart"></canvas>
     </div>
 
-    <!-- Weeks will load here -->
     <div id="weeks"></div>
   </div>
 
@@ -162,7 +165,10 @@
 
     const weeksContainer = document.getElementById("weeks");
 
-    // Chart setup
+    function getTextColor() {
+      return getComputedStyle(document.body).getPropertyValue("--text").trim();
+    }
+
     let chart;
     function renderChart(allData) {
       const totals = {};
@@ -195,14 +201,24 @@
           plugins: { legend: { display: false } },
           indexAxis: "y",
           scales: {
-            x: { ticks: { precision: 0, color: getComputedStyle(document.body).getPropertyValue("--text") } },
-            y: { ticks: { color: getComputedStyle(document.body).getPropertyValue("--text") } }
+            x: { 
+              ticks: { 
+                precision: 0, 
+                color: getTextColor(),
+                font: { weight: "600", size: 14 }
+              } 
+            },
+            y: { 
+              ticks: { 
+                color: getTextColor(),
+                font: { weight: "600", size: 14 }
+              } 
+            }
           }
         }
       });
     }
 
-    // Render week table
     function renderWeek(week, data) {
       const opponent = data._opponent || "";
       let html = `
@@ -252,7 +268,6 @@
       return html;
     }
 
-    // Update functions
     function updateGoals(week, player, delta) {
       const ref = db.ref("goals/" + week + "/" + player);
       ref.transaction(current => {
@@ -274,7 +289,6 @@
       db.ref("goals/" + week + "/_opponent").set(opponent);
     }
 
-    // Live sync
     db.ref("goals").on("value", snapshot => {
       const data = snapshot.val() || {};
       weeksContainer.innerHTML = "";
@@ -285,7 +299,6 @@
       renderChart(data);
     });
 
-    // Theme toggle
     const themeToggle = document.getElementById("themeToggle");
     let darkMode = false;
 
