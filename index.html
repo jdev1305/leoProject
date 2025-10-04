@@ -111,11 +111,23 @@
     .btn-add { background: #198754; color: #fff; }
     .btn-minus { background: #fd7e14; color: #fff; }
     .btn-remove { background: #dc3545; color: #fff; }
-    .btn-action { background: #6f42c1; color: #fff; height: 38px; }
+    .btn-action { 
+      background: #6f42c1; 
+      color: #fff; 
+      height: 38px; 
+      line-height: 1.2; 
+      white-space: nowrap;
+    }
 
     .form-control {
       border-radius: 8px !important;
       height: 38px;
+    }
+
+    /* Limit player input width */
+    .add-player-input {
+      max-width: 220px;
+      flex: 0 0 auto;
     }
 
     #themeToggle {
@@ -258,7 +270,7 @@
             <tr class="add-player-row">
               <td colspan="3">
                 <div class="d-flex align-items-center gap-2">
-                  <input type="text" id="newPlayer-${week}" class="form-control" placeholder="Player name">
+                  <input type="text" id="newPlayer-${week}" class="form-control add-player-input" placeholder="Player name">
                   <button class="btn btn-action btn-sm" onclick="addPlayer('${week}')">Add Player</button>
                 </div>
               </td>
