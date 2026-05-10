@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>Leonidas Goals Tracker</title>
 
-  <!-- Bootswatch Lux (light theme base) -->
   <link 
     href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/lux/bootstrap.min.css" 
     rel="stylesheet"
@@ -27,12 +26,12 @@
 
     [data-theme="dark"] {
       --bg: #121212;
-      --card-bg: #1e1e1e;
-      --text: #f5f5f5;
+      --card-bg: #202020;
+      --text: #f1f5f9;
       --table-bg: #1e1e1e;
-      --table-text: #f5f5f5;
-      --accent: #3399ff;
-      --border-color: #333;
+      --table-text: #f1f5f9;
+      --accent: #0b35d9;
+      --border-color: #444;
     }
 
     body {
@@ -40,11 +39,13 @@
       color: var(--text);
       font-family: "Segoe UI", Roboto, Arial, sans-serif;
       font-weight: 500;
+      transition: background 0.25s ease, color 0.25s ease;
     }
 
     h1 {
-      font-weight: 700;
+      font-weight: 800;
       color: var(--text);
+      letter-spacing: 1px;
     }
 
     .chart-container,
@@ -52,28 +53,30 @@
       background: var(--card-bg);
       color: var(--text);
       padding: 0;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      border-radius: 14px;
+      margin-bottom: 22px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
       overflow: hidden;
+      border: 1px solid var(--border-color);
     }
 
     .chart-container {
-      padding: 20px;
-      height: 400px;
-      margin-bottom: 30px;
+      padding: 24px;
+      height: 420px;
+      margin-bottom: 32px;
     }
 
     .week-title {
-      background: var(--accent);
+      background: linear-gradient(90deg, #0b35d9, #1c4dff);
       display: block;
       width: 100%;
-      padding: 10px 16px;
-      border-radius: 8px 8px 0 0;
-      font-weight: 700;
+      padding: 12px 18px;
+      border-radius: 14px 14px 0 0;
+      font-weight: 800;
       margin-bottom: 0;
       color: #fff;
       text-align: left;
+      letter-spacing: 0.5px;
     }
 
     table {
@@ -89,6 +92,7 @@
       color: var(--table-text) !important;
       vertical-align: middle;
       border-bottom: 1px solid var(--border-color);
+      padding: 14px 16px !important;
     }
 
     thead tr {
@@ -96,11 +100,20 @@
       color: var(--table-text) !important;
     }
 
+    th {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
     .btn {
       font-size: 14px !important;
       padding: 6px 12px !important;
       line-height: 1.4 !important;
-      border-radius: 8px !important;
+      border-radius: 10px !important;
+      border: none !important;
+      font-weight: 700;
     }
 
     .btn-group.d-flex .btn {
@@ -109,9 +122,32 @@
       margin: 2px;
     }
 
-    .btn-add { background: #198754; color: #fff; }
-    .btn-minus { background: #fd7e14; color: #fff; }
-    .btn-remove { background: #dc3545; color: #fff; }
+    .btn-add { 
+      background: #198754; 
+      color: #fff; 
+    }
+
+    .btn-add:hover {
+      background: #157347;
+    }
+
+    .btn-minus { 
+      background: #fd7e14; 
+      color: #fff; 
+    }
+
+    .btn-minus:hover {
+      background: #dc6502;
+    }
+
+    .btn-remove { 
+      background: #dc3545; 
+      color: #fff; 
+    }
+
+    .btn-remove:hover {
+      background: #bb2d3b;
+    }
 
     .btn-action { 
       background: #6f42c1; 
@@ -121,12 +157,25 @@
       white-space: nowrap;
     }
 
-    .form-control {
-      border-radius: 8px !important;
-      height: 38px;
+    .btn-action:hover {
+      background: #5b35a0;
     }
 
-    /* Limit player input width */
+    .form-control {
+      border-radius: 10px !important;
+      height: 40px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-color);
+      color: var(--text);
+    }
+
+    .form-control:focus {
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+    }
+
     .add-player-input {
       max-width: 220px;
       flex: 0 0 auto;
@@ -137,14 +186,29 @@
       top: 15px;
       left: 15px;
       z-index: 9999;
-      font-size: 18px;
-      padding: 10px 16px;
-      border-radius: 8px;
+      font-size: 14px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    canvas {
+      max-width: 100%;
     }
 
     @media (max-width: 576px) {
-      canvas {
-        font-size: 14px !important;
+      .chart-container {
+        height: 360px;
+        padding: 18px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      table th,
+      table td {
+        padding: 12px 10px !important;
       }
     }
   </style>
@@ -153,7 +217,9 @@
   <div class="container py-4">
     <button id="themeToggle" class="btn btn-secondary">🌙 Dark Mode</button>
 
-    <h1 class="text-center mb-4">R.H.V.Leonidas H13 - Topscorers 25/26</h1>
+    <h1 class="text-center mb-4">
+      R.H.V.LEONIDAS H13 - TOPSCORERS 25/26
+    </h1>
 
     <div class="chart-container">
       <canvas id="goalsChart"></canvas>
@@ -180,7 +246,15 @@
     const weeksContainer = document.getElementById("weeks");
 
     function getTextColor() {
-      return getComputedStyle(document.body).getPropertyValue("--text").trim();
+      return getComputedStyle(document.body)
+        .getPropertyValue("--text")
+        .trim();
+    }
+
+    function getChartGridColor() {
+      return document.body.getAttribute("data-theme") === "dark"
+        ? "rgba(255,255,255,0.12)"
+        : "rgba(0,0,0,0.10)";
     }
 
     let chart;
@@ -195,11 +269,15 @@
         }
       }
 
-      const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+      const sorted = Object.entries(totals)
+        .sort((a, b) => b[1] - a[1]);
 
       const labels = sorted.map(([p]) => p);
       const data = sorted.map(([_, g]) => g);
-      const colors = labels.map((_, i) => `hsl(${i * 40}, 70%, 50%)`);
+
+      const colors = labels.map(
+        (_, i) => `hsl(${i * 40}, 75%, 52%)`
+      );
 
       if (chart) chart.destroy();
 
@@ -210,7 +288,8 @@
           datasets: [{
             data,
             backgroundColor: colors,
-            borderRadius: 8
+            borderRadius: 10,
+            borderSkipped: false
           }]
         },
         options: {
@@ -228,18 +307,30 @@
                 precision: 0,
                 color: getTextColor(),
                 font: {
-                  weight: "600",
+                  weight: "700",
                   size: 14
                 }
+              },
+              grid: {
+                color: getChartGridColor()
+              },
+              border: {
+                color: getChartGridColor()
               }
             },
             y: {
               ticks: {
                 color: getTextColor(),
                 font: {
-                  weight: "600",
+                  weight: "700",
                   size: 14
                 }
+              },
+              grid: {
+                color: getChartGridColor()
+              },
+              border: {
+                color: getChartGridColor()
               }
             }
           }
@@ -375,7 +466,10 @@
 
       for (let i = 1; i <= 20; i++) {
         const week = "Week" + i;
-        weeksContainer.innerHTML += renderWeek(week, data[week] || {});
+        weeksContainer.innerHTML += renderWeek(
+          week,
+          data[week] || {}
+        );
       }
 
       renderChart(data);
@@ -396,7 +490,9 @@
         darkMode = true;
       }
 
-      db.ref("goals").once("value", snap => renderChart(snap.val() || {}));
+      db.ref("goals").once("value", snap => {
+        renderChart(snap.val() || {});
+      });
     });
   </script>
 </body>
