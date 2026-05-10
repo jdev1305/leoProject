@@ -102,6 +102,7 @@
       line-height: 1.4 !important;
       border-radius: 8px !important;
     }
+
     .btn-group.d-flex .btn {
       flex: 1 1 auto;
       min-width: 60px;
@@ -111,6 +112,7 @@
     .btn-add { background: #198754; color: #fff; }
     .btn-minus { background: #fd7e14; color: #fff; }
     .btn-remove { background: #dc3545; color: #fff; }
+
     .btn-action { 
       background: #6f42c1; 
       color: #fff; 
@@ -171,6 +173,7 @@
       measurementId: "G-59JJEDNL8E",
       databaseURL: "https://leonidasgoalstracker-default-rtdb.europe-west1.firebasedatabase.app"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -181,8 +184,10 @@
     }
 
     let chart;
+
     function renderChart(allData) {
       const totals = {};
+
       for (let week in allData) {
         for (let player in allData[week]) {
           if (player === "_opponent") continue;
@@ -190,12 +195,14 @@
         }
       }
 
-      const sorted = Object.entries(totals).sort((a,b) => b[1] - a[1]);
+      const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+
       const labels = sorted.map(([p]) => p);
-      const data = sorted.map(([_,g]) => g);
-      const colors = labels.map((_, i) => `hsl(${i*40}, 70%, 50%)`);
+      const data = sorted.map(([_, g]) => g);
+      const colors = labels.map((_, i) => `hsl(${i * 40}, 70%, 50%)`);
 
       if (chart) chart.destroy();
+
       chart = new Chart(document.getElementById("goalsChart"), {
         type: "bar",
         data: {
@@ -209,21 +216,31 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
           indexAxis: "y",
           scales: {
-            x: { 
-              ticks: { 
-                precision: 0, 
+            x: {
+              ticks: {
+                precision: 0,
                 color: getTextColor(),
-                font: { weight: "600", size: 14 }
-              } 
+                font: {
+                  weight: "600",
+                  size: 14
+                }
+              }
             },
-            y: { 
-              ticks: { 
+            y: {
+              ticks: {
                 color: getTextColor(),
-                font: { weight: "600", size: 14 }
-              } 
+                font: {
+                  weight: "600",
+                  size: 14
+                }
+              }
             }
           }
         }
@@ -233,9 +250,11 @@
     function renderWeek(week, data) {
       const opponent = data._opponent || "";
       const opponentClass = opponent ? "fw-bold" : "";
+
       let html = `
         <div class="week-container">
           <div class="week-title">${week.replace("Week", "Week ")}</div>
+
           <table class="table">
             <thead>
               <tr>
@@ -243,77 +262,127 @@
                 <th>Goals</th>
                 <th class="text-end">
                   Opponent
-                  <input type="text" class="form-control d-inline-block w-auto ${opponentClass}" 
-                    value="${opponent}" onchange="saveOpponent('${week}', this.value)">
+                  <input 
+                    type="text" 
+                    class="form-control d-inline-block w-auto ${opponentClass}" 
+                    value="${opponent}" 
+                    onchange="saveOpponent('${week}', this.value)"
+                  >
                 </th>
               </tr>
             </thead>
+
             <tbody>
       `;
+
       for (let player in data) {
         if (player === "_opponent") continue;
+
         html += `
           <tr>
             <td><b>${player}</b></td>
             <td>${data[player]}</td>
+
             <td>
               <div class="btn-group d-flex flex-wrap" role="group">
-                <button class="btn btn-add btn-sm flex-fill" onclick="updateGoals('${week}','${player}',1)">+1</button>
-                <button class="btn btn-minus btn-sm flex-fill" onclick="updateGoals('${week}','${player}',-1)">-1</button>
-                <button class="btn btn-remove btn-sm flex-fill" onclick="removePlayer('${week}','${player}')">X</button>
+                <button 
+                  class="btn btn-add btn-sm flex-fill" 
+                  onclick="updateGoals('${week}','${player}',1)"
+                >
+                  +1
+                </button>
+
+                <button 
+                  class="btn btn-minus btn-sm flex-fill" 
+                  onclick="updateGoals('${week}','${player}',-1)"
+                >
+                  -1
+                </button>
+
+                <button 
+                  class="btn btn-remove btn-sm flex-fill" 
+                  onclick="removePlayer('${week}','${player}')"
+                >
+                  X
+                </button>
               </div>
             </td>
           </tr>
         `;
       }
+
       html += `
             <tr class="add-player-row">
               <td colspan="3">
                 <div class="d-flex align-items-center gap-2">
-                  <input type="text" id="newPlayer-${week}" class="form-control add-player-input" placeholder="Player name">
-                  <button class="btn btn-action btn-sm" onclick="addPlayer('${week}')">Add Player</button>
+                  <input 
+                    type="text" 
+                    id="newPlayer-${week}" 
+                    class="form-control add-player-input" 
+                    placeholder="Player name"
+                  >
+
+                  <button 
+                    class="btn btn-action btn-sm" 
+                    onclick="addPlayer('${week}')"
+                  >
+                    Add Player
+                  </button>
                 </div>
               </td>
             </tr>
+
             </tbody>
           </table>
         </div>
       `;
+
       return html;
     }
 
     function updateGoals(week, player, delta) {
       const ref = db.ref("goals/" + week + "/" + player);
+
       ref.transaction(current => {
-        return (current || 0) + delta > 0 ? (current || 0) + delta : 0;
+        return (current || 0) + delta > 0
+          ? (current || 0) + delta
+          : 0;
       });
     }
+
     function removePlayer(week, player) {
       db.ref("goals/" + week + "/" + player).remove();
     }
+
     function addPlayer(week) {
       const input = document.getElementById("newPlayer-" + week);
       const name = input.value.trim();
+
       if (name) {
         db.ref("goals/" + week + "/" + name).set(0);
         input.value = "";
       }
     }
+
     function saveOpponent(week, opponent) {
       db.ref("goals/" + week + "/_opponent").set(opponent);
     }
 
     db.ref("goals").on("value", snapshot => {
       const data = snapshot.val() || {};
+
       weeksContainer.innerHTML = "";
-      for (let i = 1; i <= 10; i++) {
+
+      for (let i = 1; i <= 20; i++) {
         const week = "Week" + i;
         weeksContainer.innerHTML += renderWeek(week, data[week] || {});
       }
+
       renderChart(data);
     });
 
     const themeToggle = document.getElementById("themeToggle");
+
     let darkMode = false;
 
     themeToggle.addEventListener("click", () => {
@@ -326,6 +395,7 @@
         themeToggle.textContent = "☀️ Light Mode";
         darkMode = true;
       }
+
       db.ref("goals").once("value", snap => renderChart(snap.val() || {}));
     });
   </script>
