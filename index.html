@@ -245,10 +245,10 @@
 
     const weeksContainer = document.getElementById("weeks");
 
-    function getTextColor() {
-      return getComputedStyle(document.body)
-        .getPropertyValue("--text")
-        .trim();
+    function getChartTextColor() {
+      return document.body.getAttribute("data-theme") === "dark"
+        ? "#f1f5f9"
+        : "#111827";
     }
 
     function getChartGridColor() {
@@ -305,7 +305,7 @@
             x: {
               ticks: {
                 precision: 0,
-                color: getTextColor(),
+                color: getChartTextColor(),
                 font: {
                   weight: "700",
                   size: 14
@@ -320,7 +320,7 @@
             },
             y: {
               ticks: {
-                color: getTextColor(),
+                color: getChartTextColor(),
                 font: {
                   weight: "700",
                   size: 14
